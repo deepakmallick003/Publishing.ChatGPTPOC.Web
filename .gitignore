@@ -136,3 +136,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+/.vs
+/.vscode
+
+/data
+/publishingchatgptpocweb/data
+/publishingchatgptpocweb/.vscode
+/publishingchatgptpocweb/.vs

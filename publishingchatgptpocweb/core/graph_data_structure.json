@@ -1,0 +1,76 @@
+{
+  "Article": {
+    "entity": "Article",
+    "properties": [
+      {
+        "xml_tag": "article-title",
+        "property_name": "title"
+      },
+      {
+        "xml_tag": "abstract/p",
+        "property_name": "abstract"
+      }
+    ],
+    "relations": [
+      {
+        "relation_type": "HAS_AUTHOR",
+        "xml_tag": "person-group[@person-group-type='author']",
+        "related_entity": "Author"
+      },
+      {
+        "relation_type": "HAS_CONCEPT",
+        "xml_tag": "kwd[@vocab='preferredTerm']",
+        "vocab_type": "de",
+        "related_entity": "Concept",
+        "sparql_query": true
+      },
+      {
+        "relation_type": "HAS_CONCEPT",
+        "xml_tag": "kwd[@vocab='organismTerm']",
+        "vocab_type": "od",
+        "related_entity": "Concept",
+        "sparql_query": true
+      },
+      {
+        "relation_type": "HAS_CONCEPT",
+        "xml_tag": "kwd[@vocab='geographicTerm']",
+        "vocab_type": "gl",
+        "related_entity": "Concept",
+        "sparql_query": true
+      }      
+    ]
+  },
+  "Concept": {
+    "entity": "Concept",
+    "properties": [
+      {
+        "property_name": "name",
+        "xml_tag": "kwd-group/kwd"
+      },
+      {
+        "property_name": "type",
+        "xml_tag": "kwd-group/kwd",
+        "vocab_type": {
+          "preferredTerm": "de",
+          "organismTerm": "od",
+          "geographicTerm": "gl"
+        }
+      }
+    ],
+    "relations": []
+  }, 
+  "Author": {
+    "entity": "Author",
+    "properties": [
+      {
+        "xml_tag": [
+          "person-group[@person-group-type='author']/string-name/given-names",
+          "person-group[@person-group-type='author']/string-name/surname"
+        ],
+        "property_name": "name",
+        "format": "{0} {1}"
+      }
+    ],
+    "relations": []
+  }
+} 

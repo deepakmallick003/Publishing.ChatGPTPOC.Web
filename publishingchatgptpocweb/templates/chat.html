@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="generator"
+          content="HTML Tidy for HTML5 (experimental) for Windows https://github.com/w3c/tidy-html5/tree/c63cc39" />
+    <title>Plantwise Assistance</title>
+    <script>
+        var gpt_url = '/chatgpt/process_request';
+        const baseURL = "/chatgpt";
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+            const elements = [
+                { id: 'mainStylesheet', attr: 'href', path: `${baseURL}/static/css/main.css` },
+                { id: 'mainScript', attr: 'src', path: `${baseURL}/static/js/main.js` },
+                { id: 'mainLogo', attr: 'src', path: `${baseURL}/static/img/eva_green.png` }
+            ];
+
+            if (isLocal) {
+                elements.forEach(el => {
+                    const newPath = el.path.replace(baseURL, '');
+                    document.getElementById(el.id)[el.attr] = newPath;
+                });
+                gpt_url = gpt_url.replace(baseURL, '');
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link id="mainStylesheet" rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <img id="mainLogo" src="/static/img/eva_green.png" alt="EVA" class="chatbot-img" />
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="audio-toggle">
+            <span class="slider round"></span>
+        </label>
+        <span class="audio-label">Audio</span>
+    </div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3 class="title">Expert Virtual Assistant</h3>
+        </div>
+        <div class="chat-box">
+            <div class="chat-log" id="chat-log"></div>
+            <div class="chat-form" id="message-form">
+                <div class="microphone-button" id="record-btn">
+                    <i class="fas fa-microphone"></i>
+                    <div class="recording-status"></div>
+                </div>
+                <div class="input-container">
+                    <textarea id="input-text" placeholder="Type your message here" autofocus="" required></textarea>
+                    <div class="input-actions">
+                        <button class="send-button" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script id="mainScript" src="/static/js/main.js"></script>   
+</body>
+</html>

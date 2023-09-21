@@ -1,0 +1,50 @@
+applications:
+  - name: "publishingchatgptpoc.web"
+
+    technology: static
+
+    ingress:
+      enabled: true
+      domain: "cdn.cabi.org"
+      basePath: "/publishingchatgpt"
+
+    seq:
+      -enabled: false
+    
+    mountSecrets:
+      - secret: publishingchatgpt
+        mappings:
+          - key: publishingchatgpt-deployed-basepath
+            nameAs: PublishingChatGPT_DEPLOYED_BASE_PATH                
+          - key: publishingchatgpt-open-ai-api-secret
+            nameAs: PublishingChatGPT_Open_AI_API_Secret                
+          - key: publishingchatgpt-open-ai-model
+            nameAs: PublishingChatGPT_Open_AI_Model
+          - key: publishingchatgpt-flask-env
+            nameAs: PublishingChatGPT_FLASK_ENV
+          - key: publishingchatgpt-neo4j_primaryindexname
+            nameAs: PublishingChatGPT_Neo4J_PrimaryIndexName
+          - key: publishingchatgpt-neo4j_url
+            nameAs: PublishingChatGPT_Neo4J_URL
+          - key: publishingchatgpt-neo4j_database                
+            nameAs: PublishingChatGPT_Neo4J_Database
+          - key: publishingchatgpt-neo4j_username
+            nameAs: PublishingChatGPT_Neo4J_UserName
+          - key: publishingchatgpt-neo4j_password
+            nameAs: PublishingChatGPT_Neo4J_Password
+          - key: publishingchatgpt-pbi_workspace_id
+            nameAs: PublishingChatGPT_PBI_WORKSPACE_ID
+          - key: publishingchatgpt-pbi_report_id_kg
+            nameAs: PublishingChatGPT_PBI_REPORT_ID_KG
+          - key: publishingchatgpt-pbi_report_id_hm
+            nameAs: PublishingChatGPT_PBI_REPORT_ID_HM
+          - key: publishingchatgpt-pbi_tenant_id
+            nameAs: PublishingChatGPT_PBI_TENANT_ID
+          - key: publishingchatgpt-pbi_client_id
+            nameAs: PublishingChatGPT_PBI_CLIENT_ID    
+          - key: publishingchatgpt-pbi_client_secret
+            nameAs: PublishingChatGPT_PBI_CLIENT_SECRET  
+          - key: publishingchatgpt-pbi_user
+            nameAs: PublishingChatGPT_PBI_USER  
+          - key: publishingchatgpt-pbi_password
+            nameAs: PublishingChatGPT_PBI_PASSWORD                     

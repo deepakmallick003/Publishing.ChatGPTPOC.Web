@@ -1,0 +1,11 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+SELECT ?concept ?prefLabel ?broaderConcept ?broaderLabel ?narrowerConcept ?narrowerLabel ?relatedConcept ?relatedLabel  
+WHERE {{ 
+    ?concept rdf:type skos:Concept ; 
+    skos:prefLabel "{keyword}"@en . 
+    OPTIONAL {{ ?concept skos:broader ?broaderConcept . ?broaderConcept skos:prefLabel ?broaderLabel . }} 
+    OPTIONAL {{ ?concept skos:narrower ?narrowerConcept . ?narrowerConcept skos:prefLabel ?narrowerLabel . }} 
+    OPTIONAL {{ ?concept skos:related ?relatedConcept . ?relatedConcept skos:prefLabel ?relatedLabel . }} 
+    FILTER((!BOUND(?broaderLabel) || LANGMATCHES(LANG(?broaderLabel), "en")) && (!BOUND(?narrowerLabel) || LANGMATCHES(LANG(?narrowerLabel), "en")) && (!BOUND(?relatedLabel) || LANGMATCHES(LANG(?relatedLabel), "en")) ) 
+}}

@@ -1,0 +1,522 @@
+/*body {
+    font-family: Open Sans, sans-serif;
+    background-image: url(https://site.plantwise.org/wp-content/uploads/sites/9/2021/04/TreyzKapturecTreyzKapture-3-4-scaled.jpg);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-attachment: scroll;
+    background-size: cover;
+}*/
+
+/* Chat container */
+ .chat-container {
+     border: 1px solid #ccc;
+     border-radius: 5px;
+     overflow: hidden;
+     margin: 10px auto;
+     max-width: 70vw;
+     padding: 10px;
+     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Chat container */
+ .chat-container-pubtest {
+     background-image: url(https://www.cabi.org/wp-content/uploads/about-cabi/iStock-478002684.jpg);
+}
+
+
+/* Title */
+ .title {
+     margin-top: 0;
+     text-align: center;
+}
+/* Chat box */
+.chat-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 75vh; /* replace 400px with 90vh */
+    margin-top: 10px;
+    background-color: #f7f7f7ba;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+}
+/* Chat log */
+ .chat-log {
+     flex: 1;
+     overflow: auto;
+     padding: 10px;
+     scrollbar-width: thin;
+     scrollbar-color: #ccc #f7f7f7;
+}
+ .chat-log::-webkit-scrollbar {
+     width: 6px;
+}
+ .chat-log::-webkit-scrollbar-track {
+     background: #f7f7f7;
+}
+ .chat-log::-webkit-scrollbar-thumb {
+     background-color: #ccc;
+     border-radius: 10px;
+     border: 2px solid #f7f7f7;
+}
+/* Chat form */
+ .chat-form {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     padding: 10px;
+     background-color: #fff;
+     border-top: 1px solid #ccc;
+}
+/* Text input field */
+ .input-container {
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     flex-grow: 1;
+     margin-left: 10px;
+}
+ #input-text {
+     flex-grow: 1;
+     padding: 10px;
+     border-radius: 5px;
+     border: none;
+     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+     font-size: 16px;
+     resize: none;
+    /* Disable resizing of the textarea */
+}
+ .input-actions {
+     display: flex;
+     justify-content: flex-end;
+     margin-left: 10px;
+}
+ .send-button {
+     background-color: #368729;
+     color: white;
+     border: none;
+     border-radius: 5px;
+     padding: 10px;
+     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+     cursor: pointer;
+     font-size: 16px;
+}
+
+.send-button-pubtest{
+	background-color: #000;
+    color: white;
+}
+
+ .send-button:hover {
+     opacity: 0.8;
+}
+ .chat-form input[type=text] {
+     flex-grow: 1;
+     padding: 10px;
+     border-radius: 5px;
+     border: none;
+     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+     font-size: 16px;
+}
+ .microphone-button {
+     background-color: #f1f1f1;
+     border-radius: 50%;
+     width: 50px;
+     height: 50px;
+     border: none;
+     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+     cursor: pointer;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     margin-right: 10px;
+}
+
+ .microphone-button i {
+     font-size: 24px;
+     color: #368729;
+}
+
+.microphone-button-pubtest {
+     background-color: #000;     
+}
+
+.microphone-button-pubtest i {
+     color: #fff;
+}
+
+ .microphone-button.active {
+     background-color: #368729;
+}
+ .microphone-button.active i {
+     color: #fff;
+}
+/* Add spacing between elements */
+ .chat-form > * {
+     margin: 0 5px;
+}
+/* Header */
+.header {
+    padding: 10px;
+    display: block;
+}
+
+/* Header */
+.chat-header {
+    background-color: #368729;
+    padding: 20px;
+}
+
+.header-pubtest {
+     background-color: #000000a6;
+}
+
+/* Logo container */
+.logo-container {
+    /*margin-right: 20px;*/
+    float: left;
+}
+/* Chatbot image */
+ .chatbot-img {
+     width: auto;
+     max-height: 50%;
+     height: 120px;
+}
+/* Title */
+ .title {
+     color: #fff;
+     margin: 0;
+}
+.title-pubtest {
+     color: #fff;
+}
+
+/* Chat message */
+ .message-container {
+     display: flex;
+     align-items: center;
+     margin: 10px 0;
+}
+ .message-content {
+     background-color: #ffffff;
+     padding: 10px;
+     margin-bottom: 10px;
+     max-width: 75%;
+     border-radius: 20px 20px 20px 0;
+}
+ .message-content:before {
+    
+}
+ .message-content:after {
+     content: "";
+     position: absolute;
+     top: 0;
+     left: -30px;
+     border-top: 26px solid transparent;
+     border-bottom: 26px solid transparent;
+     border-right: 26px solid #cccccc;
+}
+/* User message */
+.user-message {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+ .user-icon, .assistant-icon {
+     font-size: 20px;
+     margin-right: 10px;
+}
+
+.flex-user {
+    justify-content: flex-start;
+}
+
+.chat-angle-user {
+    border-radius: 0 20px 20px 20px;
+}
+
+/* Bot message */
+.bot-message {
+    display: block;
+    align-items: center;
+    padding: 10px;
+}
+/* Bot icon */
+ .bot-icon {
+     font-size: 24px;
+     margin-right: 10px;
+}
+
+.flex-bot {
+    justify-content: flex-end;
+}
+
+.chat-angle-bot {
+    border-radius: 20px 0px 20px 20px;
+}
+
+/* Audio message */
+ .audio-message {
+     background-color: #f1f1f1;
+     border-radius: 20px;
+     padding: 10px;
+     margin-right: 10px;
+     display: flex;
+     align-items: center;
+}
+/* Audio icon */
+ .audio-icon {
+     font-size: 24px;
+     margin-right: 10px;
+}
+/* Play button */
+ .play-button {
+     background-color: #368729;
+     color: white;
+     border: none;
+     border-radius: 5px;
+     padding: 10px;
+     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+     cursor: pointer;
+     font-size: 16px;
+     margin-left: 10px;
+}
+/* Play button icon */
+ .play-button i {
+     font-size: 24px;
+     color: #fff;
+}
+/* Play button:hover */
+ .play-button:hover {
+     opacity: 0.8;
+}
+
+
+
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+    .image-gallery figure {
+        text-align: center;
+        flex: 1 0 auto;
+        margin: 5px;
+    }
+
+    .image-gallery img {
+        border: 1px solid #ccc;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        margin: 0 10px;
+        max-width: 100%; /* Ensure the images don't exceed the width of their container */
+        height: auto; /* Maintain the aspect ratio of the images */
+    }
+
+    .image-gallery figcaption {
+        margin-top: 5px;
+        font-size: 0.8em;
+        color: #666;
+    }
+
+
+.loader {
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid #368729;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    float: right;
+}
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+input:checked + .slider {
+    background-color: #368729;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #368729;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+
+.audio-label {
+    float: right;
+    margin-right: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 5px;
+    color: whitesmoke;
+}
+
+.warning-message-span {
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    width: 100%;
+    color: #ccc;
+    margin-bottom: 10px; 
+}
+
+#report-container {
+    height: 60vh;
+    margin: 0 auto;
+    border: none; 
+    background: none;
+    display: none;
+}
+
+#section_2 {
+    display: none;
+}
+
+
+/*********Override Template Css*******/
+
+:root {
+    --white-color:                  #ffffff;
+    --primary-color:                #ccc;
+    --secondary-color:              #368729;
+    --section-bg-color:             #f0f8ff;
+    --custom-btn-bg-color:          #368729;
+    --custom-btn-bg-hover-color:    #ccc;
+    --dark-color:                   #000000;
+    --p-color:                      #717275;
+    --border-color:                 #56b546;
+    --link-hover-color:             #ccc;
+  
+    --body-font-family:             'Open Sans', sans-serif;
+    --title-font-family:            'Montserrat', sans-serif;
+  
+    --h1-font-size:                 58px;
+    --h2-font-size:                 46px;
+    --h3-font-size:                 32px;
+    --h4-font-size:                 28px;
+    --h5-font-size:                 24px;
+    --h6-font-size:                 22px;
+    --p-font-size:                  20px;
+    --menu-font-size:               14px;
+    --btn-font-size:                18px;
+    --copyright-font-size:          16px;
+  
+    --border-radius-large:          100px;
+    --border-radius-medium:         20px;
+    --border-radius-small:          10px;
+  
+    --font-weight-normal:           400;
+    --font-weight-medium:           500;
+    --font-weight-semibold:         600;
+    --font-weight-bold:             700;
+  }
+
+.hero-section {
+    background-image: linear-gradient(15deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.timeline-section {
+    /* background-image: url('../img/colleagues-working-cozy-office-medium-shot.jpg'); */
+    background-image: url(https://site.plantwise.org/wp-content/uploads/sites/9/2021/04/TreyzKapturecTreyzKapture-3-4-scaled.jpg);
+}
+
+.custom-block-overlay {
+    min-height: 250px
+}
+
+a {
+    color: var(--secondary-color);
+}
+
+h6 {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.timeline-container .vertical-scrollable-timeline li .icon-holder {
+    background-color: var(--primary-color);
+}
+
+.timeline-container .vertical-scrollable-timeline li .icon-holder::before {
+    background-color: var(--primary-color);
+}
+
+.timeline-container .vertical-scrollable-timeline .list-progress {
+    background-color: var(--secondary-color);
+}
+
+.timeline-container .vertical-scrollable-timeline li .icon-holder i {
+    color: var(--secondary-color);
+}
+
+.timeline-container .vertical-scrollable-timeline li.active .icon-holder {
+    background-color: var(--secondary-color);
+}
