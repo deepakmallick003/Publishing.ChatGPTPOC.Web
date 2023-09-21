@@ -143,3 +143,8 @@ cython_debug/
 /publishingchatgptpoc.web/data
 /publishingchatgptpoc.web/.vscode
 /publishingchatgptpoc.web/.vs
+
+/publishingchatgptpocweb/data
+/publishingchatgptpocweb/.vscode
+/publishingchatgptpocweb/.vs
+
