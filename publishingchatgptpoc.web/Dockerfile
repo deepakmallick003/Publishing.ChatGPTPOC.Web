@@ -10,14 +10,14 @@ WORKDIR /app
 
 #
 #COPY requirements.txt ./ 
-COPY publishingchatgptpocweb/requirements.txt ./
+COPY publishingchatgptpoc.web/requirements.txt ./
 
 # 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # 
 #COPY . .
-COPY publishingchatgptpocweb/. ./
+COPY publishingchatgptpoc.web/. ./
 
 # Expose the port the app runs in
 EXPOSE 5000
