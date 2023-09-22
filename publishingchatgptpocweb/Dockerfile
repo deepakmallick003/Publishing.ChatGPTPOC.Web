@@ -1,5 +1,5 @@
 # 
-FROM python:3.11
+FROM python:3.8.5
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
