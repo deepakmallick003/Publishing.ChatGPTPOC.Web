@@ -12,7 +12,8 @@ from scripts import ai
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY)
 app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+#socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='gevent')
 PathConfig.init_app(app)
 # Instantiate AI
 ai = ai.AI(settings, PathConfig)
