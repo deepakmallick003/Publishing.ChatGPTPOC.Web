@@ -24,5 +24,6 @@ EXPOSE 80
 
 # Run the application
 #CMD ["gunicorn", "-b", "0.0.0.0:5000", "route:app"]
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:80", "route:app"]
+#CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:80", "route:app"]
+CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "-b", "0.0.0.0:80", "route:app"]
 
