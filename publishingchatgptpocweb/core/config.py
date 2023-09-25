@@ -2,39 +2,41 @@
 # From the enviornments vaiables
 
 import os
-from pydantic import Field, BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from pathlib import Path
 
 class ApplicationSettings(BaseSettings):
-    # SEQ_API_KEY: str = Field(default='',env='SEQ_API_KEY')
-    # SEQ_SERVER: str = Field(default='',env='SEQ_SERVER')
-    DEPLOYED_BASE_PATH: str = Field(default='/',env='PublishingChatGPT_DEPLOYED_BASE_PATH')   
-    FLASK_ENV: str = Field(default='local',env='PublishingChatGPT_FLASK_ENV')   
+    # SEQ_API_KEY: str = Field(alias='SEQ_API_KEY')
+    # SEQ_SERVER: str = Field(alias='SEQ_SERVER')
+    DEPLOYED_BASE_PATH: str = Field(alias='PublishingChatGPT_DEPLOYED_BASE_PATH')
+    FLASK_ENV: str = Field(alias='PublishingChatGPT_FLASK_ENV')  
 
-    Open_AI_API_Secret: str = Field(default='/',env='PublishingChatGPT_Open_AI_API_Secret')
-    Open_AI_Model: str = Field(default='/',env='PublishingChatGPT_Open_AI_Model')
+    Open_AI_API_Secret: str = Field(alias='PublishingChatGPT_Open_AI_API_Secret')
+    Open_AI_Model: str = Field(alias='PublishingChatGPT_Open_AI_Model')
     
-    # AzureAd_TenantId: str = Field(default='/',env='AzureAd_TenantId')
-    # AzureAd_ClientId: str = Field(default='/',env='AzureAd_ClientId')
-    # AzureAd_ClientSecret: str = Field(default='/',env='AzureAd_ClientSecret')
+    # AzureAd_TenantId: str = Field(alias='AzureAd_TenantId')
+    # AzureAd_ClientId: str = Field(alias='AzureAd_ClientId')
+    # AzureAd_ClientSecret: str = Field(alias='AzureAd_ClientSecret')
 
-    # MS_AZURE_SPEECH_KEY: str = Field(default='/',env='MS_AZURE_SPEECH_KEY')
-    # MS_AZURE_SPEECH_REGION: str = Field(default='/',env='MS_AZURE_SPEECH_REGION')
+    # MS_AZURE_SPEECH_KEY: str = Field(alias='MS_AZURE_SPEECH_KEY')
+    # MS_AZURE_SPEECH_REGION: str = Field(alias='MS_AZURE_SPEECH_REGION')
 
-    Neo4J_URL: str = Field(default='/',env='PublishingChatGPT_Neo4J_URL')
-    Neo4J_UserName: str = Field(default='/',env='PublishingChatGPT_Neo4J_UserName')
-    Neo4J_Database: str = Field(default='/',env='PublishingChatGPT_Neo4J_Database')
-    Neo4J_Password: str = Field(default='/',env='PublishingChatGPT_Neo4J_Password')
-    Neo4J_PrimaryIndexName: str = Field(default='/',env='PublishingChatGPT_Neo4J_PrimaryIndexName')
+    Neo4J_URL: str = Field(alias='PublishingChatGPT_Neo4J_URL')
+    Neo4J_UserName: str = Field(alias='PublishingChatGPT_Neo4J_UserName')
+    Neo4J_Database: str = Field(alias='PublishingChatGPT_Neo4J_Database')
+    Neo4J_Password: str = Field(alias='PublishingChatGPT_Neo4J_Password')
+    Neo4J_PrimaryIndexName: str = Field(alias='PublishingChatGPT_Neo4J_PrimaryIndexName')
 
-    PBI_WORKSPACE_ID: str = Field(default='/',env='PublishingChatGPT_PBI_WORKSPACE_ID')
-    PBI_REPORT_ID_KG: str = Field(default='/',env='PublishingChatGPT_PBI_REPORT_ID_KG')
-    PBI_REPORTd_ID_HM: str = Field(default='/',env='PublishingChatGPT_PBI_REPORT_ID_HM')
-    PBI_TENANT_ID: str = Field(default='/',env='PublishingChatGPT_PBI_TENANT_ID')
-    PBI_CLIENT_ID: str = Field(default='/',env='PublishingChatGPT_PBI_CLIENT_ID')
-    PBI_CLIENT_SECRET: str = Field(default='/',env='PublishingChatGPT_PBI_CLIENT_SECRET')
-    PBI_USER: str = Field(default='/',env='PublishingChatGPT_PBI_USER')
-    PBI_PASSWORD: str = Field(default='/',env='PublishingChatGPT_PBI_PASSWORD')
+    PBI_WORKSPACE_ID: str = Field(alias='PublishingChatGPT_PBI_WORKSPACE_ID')
+    PBI_REPORT_ID_KG: str = Field(alias='PublishingChatGPT_PBI_REPORT_ID_KG')
+    PBI_REPORTd_ID_HM: str = Field(alias='PublishingChatGPT_PBI_REPORT_ID_HM')
+    PBI_TENANT_ID: str = Field(alias='PublishingChatGPT_PBI_TENANT_ID')
+    PBI_CLIENT_ID: str = Field(alias='PublishingChatGPT_PBI_CLIENT_ID')
+    PBI_CLIENT_SECRET: str = Field(alias='PublishingChatGPT_PBI_CLIENT_SECRET')
+    PBI_USER: str = Field(alias='PublishingChatGPT_PBI_USER')
+    # PBI_PASSWORD: str = Field(alias='PublishingChatGPT_PBI_PASSWORD')
+    PBI_PASSWORD: str = Field(alias='PublishingChatGPT_PBI_PASSWORD')
 
     
     

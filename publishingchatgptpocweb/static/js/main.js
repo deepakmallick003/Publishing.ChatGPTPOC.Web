@@ -79,9 +79,9 @@ function SendRequestToServer(fd) {
     $(evaResponseControl).html('');
     $(evaLinksControl).html('');
 
-    socket.emit('get_gptnormal', { text: text });
     socket.emit('get_answer', { text: text });
     socket.emit('get_reference', { text: text });
+    socket.emit('get_gptnormal', { text: text });
 
     socket.off('gptnormal_response');  // Remove the previous listener
     socket.on('gptnormal_response', function(response) {

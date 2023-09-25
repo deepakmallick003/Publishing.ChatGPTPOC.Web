@@ -494,6 +494,7 @@ input:checked + .slider:before {
 
 a {
     color: var(--secondary-color);
+    font-weight: bold;
 }
 
 h6 {
