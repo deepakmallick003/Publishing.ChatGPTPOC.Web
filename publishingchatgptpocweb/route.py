@@ -10,7 +10,7 @@ from scripts import ai
 
 
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY)
-app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
+app.config['BASE_PATH'] = '' if settings.DEPLOYED_BASE_PATH == '/' else settings.DEPLOYED_BASE_PATH
 socketio = SocketIO(app, cors_allowed_origins="*")
 # if settings.FLASK_ENV == 'production':
 #     socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")

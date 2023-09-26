@@ -1,5 +1,5 @@
 applications:
-  - name: "publishingchatgptpoc.web"
+  - name: "publishingchatgptpocweb"
 
     technology: static
 
