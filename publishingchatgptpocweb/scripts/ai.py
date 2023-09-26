@@ -11,7 +11,7 @@ from langchain.schema import HumanMessage
 
 class AI:
 
-    def __init__(self, settings, pathconfig, socketio):
+    def __init__(self, settings, pathconfig):
         self.settings = settings
         self.pathconfig = pathconfig
 
@@ -22,9 +22,9 @@ class AI:
         self.max_tokens_response=500
         
         self.data_instance = self.init_data_instance()
-        self.custom_callback_handler_normal = NormalCallbackHandler(socketio)
-        self.custom_callback_handler_answer = AnswerCallbackHandler(socketio)
-        self.custom_callback_handler_reference = ReferenceCallbackHandler(socketio)
+        # self.custom_callback_handler_normal = NormalCallbackHandler(socketio)
+        # self.custom_callback_handler_answer = AnswerCallbackHandler(socketio)
+        # self.custom_callback_handler_reference = ReferenceCallbackHandler(socketio)
         self.retieval_qa_normal, self.retieval_qa_answer, self.retieval_qa_reference = self.init_retieval_qa()    
                
 
@@ -63,10 +63,18 @@ class AI:
 
     def init_retieval_qa(self):
 
+        # llm_answer = ChatOpenAI(
+        #     model_name=self.model,
+        #     streaming=True,
+        #     callbacks=[self.custom_callback_handler_answer],
+        #     temperature=self.temperature,
+        #     max_tokens=self.max_tokens_response,
+        #     openai_api_key=self.settings.Open_AI_API_Secret,
+        # )
+
+
         llm_answer = ChatOpenAI(
             model_name=self.model,
-            streaming=True,
-            callbacks=[self.custom_callback_handler_answer],
             temperature=self.temperature,
             max_tokens=self.max_tokens_response,
             openai_api_key=self.settings.Open_AI_API_Secret,
@@ -74,8 +82,6 @@ class AI:
 
         llm_reference = ChatOpenAI(
             model_name=self.model,
-            streaming=True,
-            callbacks=[self.custom_callback_handler_reference],
             temperature=self.temperature,
             max_tokens=self.max_tokens_response,
             openai_api_key=self.settings.Open_AI_API_Secret,
@@ -87,9 +93,7 @@ class AI:
         retieval_qa_normal = ChatOpenAI(model=self.model,
                           openai_api_key=self.settings.Open_AI_API_Secret,
                           max_tokens=self.max_tokens_response,
-                          streaming=True, 
-                          temperature=self.temperature,
-                          callbacks=[self.custom_callback_handler_normal])
+                          temperature=self.temperature)
 
         retieval_qa_answer = RetrievalQAWithSourcesChain.from_chain_type(
             llm=llm_answer,
@@ -115,18 +119,14 @@ class AI:
 
     def process_query(self, prompt, type):
         if type=="gptnormal":
-            self.retieval_qa_normal([HumanMessage(content=prompt)])
-            # for output_string in self.custom_callback_handler_normal.outputs:
-            #     yield output_string
+            return self.retieval_qa_normal([HumanMessage(content=prompt)])
 
         if type=='answer':
-            self.retieval_qa_answer({"question": prompt}, return_only_outputs=True)
-            # for output_string in self.custom_callback_handler_answer.outputs:
-            #     yield output_string
+            return self.retieval_qa_answer({"question": prompt}, return_only_outputs=True)
+          
         elif type=='reference':
-            self.retieval_qa_reference({"question": prompt}, return_only_outputs=True)
-            # for output_string in self.custom_callback_handler_reference.outputs:
-            #     yield output_string      
+            return self.retieval_qa_reference({"question": prompt}, return_only_outputs=True)
+            
 
 class NormalCallbackHandler(BaseCallbackHandler):
     def __init__(self, socketio):

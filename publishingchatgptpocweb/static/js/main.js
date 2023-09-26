@@ -16,7 +16,7 @@ let audioChunks = [];
 
 // const socket = io.connect('http://localhost:5000');
 // const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: BASE_PATH + '/socket.io' });
-const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: '/socket.io' });
+//const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: '/socket.io' });
 
 // Send message on enter key press
 inputText.addEventListener("keydown", (event) => {
@@ -71,51 +71,16 @@ let referenceText = '';
 function SendRequestToServer(fd) {
     $(responseSections).show()
     showLoader();
-    let text = fd.get('text');    
-    let incompleteMessageGPTNormal = "";
-    let incompleteMessageAnswer = "";
-    let incompleteMessageReference = "";
+        
     $(gptNormalControl).html('');
     $(evaResponseControl).html('');
-    $(evaLinksControl).html('');
+    $(evaLinksControl).html('');    
 
-    socket.emit('get_answer', { text: text });
-    socket.emit('get_reference', { text: text });
-    socket.emit('get_gptnormal', { text: text });
+    //get_model_response_socket(fd)
+    get_model_response_ajax('gptnormal', BASE_PATH + '/get_gptnormal', fd)
+    get_model_response_ajax('answer', BASE_PATH + '/get_answer', fd)
+    get_model_response_ajax('reference', BASE_PATH + '/get_reference', fd)
 
-    socket.off('gptnormal_response');  // Remove the previous listener
-    socket.on('gptnormal_response', function(response) {
-        if (response.status === 'complete') {
-            hideLoader('gptnormal');            
-        } else {
-            incompleteMessageGPTNormal += response;
-            $(gptNormalControl).html(incompleteMessageGPTNormal);
-        }
-    });
-
-    socket.off('answer_response');  // Remove the previous listener
-    socket.on('answer_response', function(response) {
-        if (response.status === 'complete') {
-            hideLoader('answer');
-            let filterURIParameter = extractLinks(incompleteMessageAnswer);
-            if (filterURIParameter) {
-                showRelationsReport(filterURIParameter);
-            }
-        } else {
-            incompleteMessageAnswer += response;
-            $(evaResponseControl).html(incompleteMessageAnswer);
-        }
-    });
-    
-    socket.off('reference_response');  // Remove the previous listener
-    socket.on('reference_response', function(response) {
-        if (response.status === 'complete') {
-            hideLoader('reference');
-        } else {
-            incompleteMessageReference += response;
-            $(evaLinksControl).html(incompleteMessageReference);
-        }
-    });
 }
 
 
@@ -164,6 +129,90 @@ function extractLinks(text) {
     
     return uniqueLinks
 }
+
+
+function get_model_response_ajax(type, route, fd)
+{
+    $.ajax({
+        url: route,
+        type: "POST",
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.status === "success") 
+            {                
+                if(type=='answer')
+                {
+                    $(evaResponseControl).html(response.text.answer);
+                    let filterURIParameter = extractLinks(response.text.answer);
+                    if (filterURIParameter) {
+                        showRelationsReport(filterURIParameter);
+                    }
+                }
+                else if(type=='reference')
+                {
+                    $(evaLinksControl).html(response.text);
+                }
+                else if(type=='gptnormal')
+                {
+                    $(gptNormalControl).html(response.text);
+                }
+            }
+            hideLoader(type);            
+        },
+        error: function(xhr) {
+            hideLoader(type);
+        }
+    });
+}
+
+function get_model_response_socket(fd)
+{
+    let text = fd.get('text');
+    let incompleteMessageGPTNormal = "";
+    let incompleteMessageAnswer = "";
+    let incompleteMessageReference = "";
+
+    socket.emit('get_answer', { text: text });
+    socket.emit('get_reference', { text: text });
+    socket.emit('get_gptnormal', { text: text });
+
+    socket.off('gptnormal_response');  // Remove the previous listener
+    socket.on('gptnormal_response', function(response) {
+        if (response.status === 'complete') {
+            hideLoader('gptnormal');            
+        } else {
+            incompleteMessageGPTNormal += response;
+            $(gptNormalControl).html(incompleteMessageGPTNormal);
+        }
+    });
+
+    socket.off('answer_response');  // Remove the previous listener
+    socket.on('answer_response', function(response) {
+        if (response.status === 'complete') {
+            hideLoader('answer');
+            let filterURIParameter = extractLinks(incompleteMessageAnswer);
+            if (filterURIParameter) {
+                showRelationsReport(filterURIParameter);
+            }
+        } else {
+            incompleteMessageAnswer += response;
+            $(evaResponseControl).html(incompleteMessageAnswer);
+        }
+    });
+    
+    socket.off('reference_response');  // Remove the previous listener
+    socket.on('reference_response', function(response) {
+        if (response.status === 'complete') {
+            hideLoader('reference');
+        } else {
+            incompleteMessageReference += response;
+            $(evaLinksControl).html(incompleteMessageReference);
+        }
+    });
+}
+
 
 
 function showRelationsReport(filterURIParameter)
