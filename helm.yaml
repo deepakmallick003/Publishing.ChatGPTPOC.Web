@@ -7,6 +7,8 @@ applications:
       enabled: true
       domain: "cdn.cabi.org"
       basePath: "/publishingchatgpt"
+      annotations:
+        nginx.ingress.kubernetes.io/enable-websocket: "true"
 
     seq:
       -enabled: false
