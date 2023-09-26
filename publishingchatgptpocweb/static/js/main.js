@@ -15,8 +15,8 @@ let mediaRecorder = null;
 let audioChunks = [];
 
 // const socket = io.connect('http://localhost:5000');
-//const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: BASE_PATH + '/socket.io' });
-const socket = io.connect('https://development-cdn.cabi.org', { path: '/publishingchatgpt/socket.io' });
+// const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: BASE_PATH + '/socket.io' });
+const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: '/socket.io' });
 
 // Send message on enter key press
 inputText.addEventListener("keydown", (event) => {

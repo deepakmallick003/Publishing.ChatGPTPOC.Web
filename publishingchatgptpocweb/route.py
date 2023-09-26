@@ -13,7 +13,8 @@ app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY)
 app.config['BASE_PATH'] = '' if settings.DEPLOYED_BASE_PATH == '/' else settings.DEPLOYED_BASE_PATH
 # socketio = SocketIO(app, cors_allowed_origins="*")
 # socketio = SocketIO(app, path=settings.DEPLOYED_BASE_PATH + '/socket.io', cors_allowed_origins="*")
-socketio = SocketIO(app, path='/publishingchatgpt/socket.io', cors_allowed_origins='*')
+# socketio = SocketIO(app, path='/publishingchatgpt/socket.io', cors_allowed_origins='*')
+socketio = SocketIO(app, path='/socket.io', cors_allowed_origins="*")
 
 
 PathConfig.init_app(app)
