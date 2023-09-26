@@ -15,9 +15,7 @@ let mediaRecorder = null;
 let audioChunks = [];
 
 // const socket = io.connect('http://localhost:5000');
-var fullUrl = window.location.protocol + "//" + window.location.host + BASE_PATH;
-const socket = io.connect(fullUrl);
-
+const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: BASE_PATH + '/socket.io' });
 
 // Send message on enter key press
 inputText.addEventListener("keydown", (event) => {
