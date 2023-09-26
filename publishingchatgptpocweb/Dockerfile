@@ -12,6 +12,7 @@ WORKDIR /publishingchatgptpocweb
 # 
 COPY publishingchatgptpocweb/requirements.txt ./
 
+
 # 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
@@ -27,6 +28,7 @@ COPY publishingchatgptpocweb/. ./
 EXPOSE 80
 
 # Run the application
-#CMD ["gunicorn", "-b", "0.0.0.0:5000", "route:app"]
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:80", "route:app"]
-
+#CMD ["gunicorn", "-b", "0.0.0.0:80", "route:app"]
+#CMD ["gunicorn", "-k", "gevent", "-w", "1", "-b", "0.0.0.0:80", "route:app"]
+#CMD ["gunicorn", "--worker-class", "gevent", "--worker-connections", "1000", "-w", "1", "-b", "0.0.0.0:80", "route:app"]
+CMD ["gunicorn", "-k", "gevent", "-w", "1", "--timeout", "120", "-b", "0.0.0.0:80", "route:app"]

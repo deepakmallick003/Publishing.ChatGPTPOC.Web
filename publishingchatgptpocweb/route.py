@@ -11,12 +11,13 @@ from scripts import ai
 
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY)
 app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
-
-#socketio = SocketIO(app, cors_allowed_origins="*")
-socketio = SocketIO(app, async_mode='gevent')
+socketio = SocketIO(app, cors_allowed_origins="*")
+# if settings.FLASK_ENV == 'production':
+#     socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")
+# else:
+#     socketio = SocketIO(app, cors_allowed_origins="*")
 PathConfig.init_app(app)
-# Instantiate AI
-ai = ai.AI(settings, PathConfig)
+ai = ai.AI(settings, PathConfig, socketio)
 
 
 # @app.before_request
@@ -79,10 +80,11 @@ def getrelationsreport():
 @socketio.on('get_gptnormal')
 def handle_get_gptnormal(data):
     text = data['text']
-    answer_generator = ai.process_query(text, 'gptnormal')
-    for chunk in answer_generator:
-        print(f"GPT Normal,Sending chunk: {chunk}") 
-        socketio.emit('gptnormal_response', chunk)
+    ai.process_query(text, 'gptnormal')
+    # answer_generator = ai.process_query(text, 'gptnormal')
+    # for chunk in answer_generator:
+    #     print(f"GPT Normal,Sending chunk: {chunk}") 
+    #     socketio.emit('gptnormal_response', chunk)
 
     # Send a completion message
     print("GPT Normal Exited the loop, sending complete status")
@@ -91,10 +93,11 @@ def handle_get_gptnormal(data):
 @socketio.on('get_answer')
 def handle_get_answer(data):
     text = data['text']
-    answer_generator = ai.process_query(text, 'answer')
-    for chunk in answer_generator:
-        print(f"Answer, Sending chunk: {chunk}")  # Log the chunk being sent
-        socketio.emit('answer_response', chunk)
+    ai.process_query(text, 'answer')
+    # answer_generator = ai.process_query(text, 'answer')
+    # for chunk in answer_generator:
+    #     print(f"Answer, Sending chunk: {chunk}")  # Log the chunk being sent
+    #     socketio.emit('answer_response', chunk)
 
     # Send a completion message
     print("Answer Exited the loop, sending complete status")
@@ -103,10 +106,11 @@ def handle_get_answer(data):
 @socketio.on('get_reference')
 def handle_get_reference(data):
     text = data['text']
-    reference_generator = ai.process_query(text, 'reference')
-    for chunk in reference_generator:
-        print(f"Reference, Sending chunk: {chunk}")  # Log the chunk being sent
-        socketio.emit('reference_response', chunk)
+    ai.process_query(text, 'reference')
+    # reference_generator = ai.process_query(text, 'reference')
+    # for chunk in reference_generator:
+    #     print(f"Reference, Sending chunk: {chunk}")  # Log the chunk being sent
+    #     socketio.emit('reference_response', chunk)
 
     # Send a completion message
     print("Reference Exited the loop, sending complete status")
