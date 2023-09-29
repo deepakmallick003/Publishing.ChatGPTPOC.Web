@@ -281,7 +281,7 @@ function showRelationsReport(filterURIParameter)
 {
     $.ajax({
         type: "GET",
-        url: BASE_PATH + "getrelationsreport",
+        url: BASE_PATH + "/getrelationsreport",
         dataType: "json",
         success: function (data) {
 
