@@ -184,7 +184,7 @@ function get_model_response_sse(type, text) {
         currentEventSource.close();
     }
 
-    currentEventSource = new EventSource(`/get_model_response_sse?type=${type}&text=${text}`);
+    currentEventSource = new EventSource(`${BASE_PATH}/get_model_response_sse?type=${type}&text=${text}`);
 
     // Define a callback for messages of type 'gptnormal'
     currentEventSource.addEventListener('gptnormal', function(event) {     
