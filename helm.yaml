@@ -49,4 +49,6 @@ applications:
           - key: publishingchatgpt-pbi_user
             nameAs: PublishingChatGPT_PBI_USER  
           - key: publishingchatgpt-pbi_password
-            nameAs: PublishingChatGPT_PBI_PASSWORD                     
+            nameAs: PublishingChatGPT_PBI_PASSWORD
+          - key: publishingchatgpt-use-web-socket
+            nameAs: PublishingChatGPT_USE_WEB_SOCKET
