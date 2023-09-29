@@ -20,7 +20,7 @@ class AI:
         openai.api_key = settings.Open_AI_API_Secret     
         self.model = settings.Open_AI_Model
         self.temperature = 0
-        self.max_tokens_response=50
+        self.max_tokens_response=1000
         
         self.data_instance = self.init_data_instance()
         self.custom_callback_handler_normal = LLMCallbackHandler('gptnormal', self.socketio)
