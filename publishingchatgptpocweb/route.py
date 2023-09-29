@@ -1,23 +1,26 @@
 import logging
-import traceback
 import json
-from flask import Flask, render_template,jsonify, request, url_for, session, redirect
-# from flask import stream_with_context, Response
-# from flask_socketio import SocketIO
+import threading
+from flask import Flask, render_template, request
+from flask import Response
+from flask_socketio import SocketIO
 from core.config import PathConfig, settings
 from core.pbiembedservice import PbiEmbedService
 from scripts import ai
 
 
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY)
-app.config['BASE_PATH'] = '' if settings.DEPLOYED_BASE_PATH == '/' else settings.DEPLOYED_BASE_PATH
+app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
+app.config['BASE_PATH'] ='' if settings.DEPLOYED_BASE_PATH =='/' else settings.DEPLOYED_BASE_PATH
+app.config['USE_WEB_SOCKET'] =settings.USE_WEB_SOCKET
 
-# socketio = SocketIO(app, path='/socket.io', cors_allowed_origins="*")
-# PathConfig.init_app(app)
-# ai = ai.AI(settings, PathConfig, socketio)
+socketio=None
+if settings.USE_WEB_SOCKET=='true':
+    socketio = SocketIO(app, cors_allowed_origins="*")
 
 PathConfig.init_app(app)
-ai = ai.AI(settings, PathConfig)
+# Instantiate AI
+ai_instance = ai.AI(settings, PathConfig, socketio)
 
 
 # @app.before_request
@@ -77,78 +80,77 @@ def getrelationsreport():
         return json.dumps({'errorMsg': str(ex)}), 500
 
 
-@app.route('/get_answer', methods=['POST'])
-def handle_get_answer():
+
+
+@app.route('/get_model_response', methods=['POST'])
+def handle_get_model_response():
     response = {}
+    text = request.form['text']
+    type = request.form['type']
+
     try:
-        text = request.form['text']
-        response['text'] = ai.process_query(text, 'answer')
-        response['status'] = 'success'
-    except:
+        answer_generator = ai_instance.process_query(type, text)
+        resp_text = ""
+        for chunk in answer_generator:
+            resp_text += chunk
+
+        response['type'] = type
+        response['text'] = resp_text
+        response['status'] = 'full response complete'    
+    except Exception as e:
+        print(f"Error during {type} Type Response: {str(e)}")
+        response['type'] = resp_text
+        response['text'] = str(e)
         response['status'] = 'error'
-    return response
-
-@app.route('/get_answer', methods=['POST'])
-def get_answer():
-    response = {}
-    try:
-        text = request.form['text']
-        res = ai.process_query(text, 'answer')
-        response['text'] = res['answer']
-        response['status'] = 'success'
-    except:
-        response['status'] = 'error'
-    return response
-
-@app.route('/get_gptnormal', methods=['POST'])
-def get_gptnormal():
-    response = {}
-    try:
-        text = request.form['text']
-        res = ai.process_query(text, 'gptnormal')
-        response['text'] = res.content
-        response['status'] = 'success'
-    except:
-        response['status'] = 'error'
-    return response
-
-@app.route('/get_reference', methods=['POST'])
-def get_reference():
-    response = {}
-    try:
-        text = request.form['text']
-        res = ai.process_query(text, 'reference')
-        response['text'] = res['answer']
-        response['status'] = 'success'
-    except:
-        response['status'] = 'error'
-    return response
-
-
-# @socketio.on('get_gptnormal')
-# def handle_get_gptnormal(data):
-#     text = data['text']
-#     ai.process_query(text, 'gptnormal')
-#     # Send a completion message
-#     print("GPT Normal Exited the loop, sending complete status")
-#     socketio.emit('gptnormal_response', {'status': 'complete'})
-
-# @socketio.on('get_answer')
-# def handle_get_answer(data):
-#     text = data['text']
-#     ai.process_query(text, 'answer')
-#     # Send a completion message
-#     print("Answer Exited the loop, sending complete status")
-#     socketio.emit('answer_response', {'status': 'complete'})
-
-# @socketio.on('get_reference')
-# def handle_get_reference(data):
-#     text = data['text']
-#     ai.process_query(text, 'reference')
-#     # Send a completion message
-#     print("Reference Exited the loop, sending complete status")
-#     socketio.emit('reference_response', {'status': 'complete'})
     
+    return response
+
+
+@app.route('/get_model_response_sse', methods=['GET'])
+def handle_get_model_response_sse():
+    type = request.args.get('type')
+    text = request.args.get('text')    
+    # Get the event stream for this type of query
+    if type=='answer':
+        event_stream_generator = ai_instance.custom_callback_handler_answer.event_stream()
+    elif type=='reference':
+        event_stream_generator = ai_instance.custom_callback_handler_reference.event_stream()
+    elif type=='gptnormal':
+        event_stream_generator = ai_instance.custom_callback_handler_normal.event_stream()            
+
+    # Process the query to start generating responses
+    # ai_instance.process_query(type, text)
+    threading.Thread(target=ai_instance.process_query, args=(type, text)).start()
+
+    return Response(event_stream_generator, content_type='text/event-stream')
+
+
+if settings.USE_WEB_SOCKET=='true':
+    @socketio.on('get_normal_request')
+    def handle_get_normal_request(data):
+        text = data['text']
+        process_request_ws('gptnormal', text)
+
+    @socketio.on('get_answer_request')
+    def handle_get_answer_request(data):
+        text = data['text']
+        process_request_ws('answer', text)
+
+    @socketio.on('get_reference_request')
+    def handle_get_reference_request(data):
+        text = data['text']
+        process_request_ws('reference', text)
+    
+    def process_request_ws(type, text):
+        try:        
+            ai_instance.process_query(type, text)
+           
+            print(f"{type} Type Response Exited, sending completion status")
+            socketio.emit(f'{type}_response', {'status': 'full response complete', 'type': type, 'text': 'already sent'})  
+        except Exception as e:
+            print(f"Error during {type} Type Response: {str(e)}")
+            socketio.emit(f'{type}_response', {'status': 'error', 'type': type, 'text': str(e)})
+
 if __name__ == '__main__':
     # app.debug = True
     # app.run()

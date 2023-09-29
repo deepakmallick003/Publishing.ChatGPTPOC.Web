@@ -11,6 +11,7 @@ class ApplicationSettings(BaseSettings):
     # SEQ_SERVER: str = Field(alias='SEQ_SERVER')
     DEPLOYED_BASE_PATH: str = Field(alias='PublishingChatGPT_DEPLOYED_BASE_PATH')
     FLASK_ENV: str = Field(alias='PublishingChatGPT_FLASK_ENV')  
+    USE_WEB_SOCKET: str = Field(alias='PublishingChatGPT_USE_WEB_SOCKET')  
 
     Open_AI_API_Secret: str = Field(alias='PublishingChatGPT_Open_AI_API_Secret')
     Open_AI_Model: str = Field(alias='PublishingChatGPT_Open_AI_Model')

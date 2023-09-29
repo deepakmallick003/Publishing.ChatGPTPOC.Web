@@ -6,27 +6,28 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import Neo4jVector
 from langchain.chains import RetrievalQAWithSourcesChain
-from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import HumanMessage
+from scripts.handlers import LLMCallbackHandler
 
 class AI:
 
-    def __init__(self, settings, pathconfig):
+    def __init__(self, settings, pathconfig, socketio=None):
         self.settings = settings
         self.pathconfig = pathconfig
+        self.socketio = socketio
 
         # Set up the OpenAI API client
         openai.api_key = settings.Open_AI_API_Secret     
         self.model = settings.Open_AI_Model
         self.temperature = 0
-        self.max_tokens_response=500
+        self.max_tokens_response=50
         
         self.data_instance = self.init_data_instance()
-        # self.custom_callback_handler_normal = NormalCallbackHandler(socketio)
-        # self.custom_callback_handler_answer = AnswerCallbackHandler(socketio)
-        # self.custom_callback_handler_reference = ReferenceCallbackHandler(socketio)
+        self.custom_callback_handler_normal = LLMCallbackHandler('gptnormal', self.socketio)
+        self.custom_callback_handler_answer = LLMCallbackHandler('answer', self.socketio)
+        self.custom_callback_handler_reference = LLMCallbackHandler('reference', self.socketio)
+
         self.retieval_qa_normal, self.retieval_qa_answer, self.retieval_qa_reference = self.init_retieval_qa()    
-               
 
     def init_data_instance(self):
         embeddings = OpenAIEmbeddings(openai_api_key=self.settings.Open_AI_API_Secret, model='text-embedding-ada-002')
@@ -62,40 +63,35 @@ class AI:
         return prompt_template_answer, prompt_template_reference            
 
     def init_retieval_qa(self):
+        param_llm = {
+            'model_name': self.model,
+            'temperature': self.temperature,
+            'max_tokens': self.max_tokens_response,
+            'openai_api_key': self.settings.Open_AI_API_Secret,
+            'streaming': True,
+        }
 
-        # llm_answer = ChatOpenAI(
-        #     model_name=self.model,
-        #     streaming=True,
-        #     callbacks=[self.custom_callback_handler_answer],
-        #     temperature=self.temperature,
-        #     max_tokens=self.max_tokens_response,
-        #     openai_api_key=self.settings.Open_AI_API_Secret,
-        # )
+        param_llm_answer = dict(param_llm)
+        param_llm_reference = dict(param_llm)
+        param_llm_normal= dict(param_llm)
+        
+        param_llm_answer.update({                
+            'callbacks': [self.custom_callback_handler_answer]
+        })
+        param_llm_reference.update({
+            'callbacks': [self.custom_callback_handler_reference] 
+        })
+        param_llm_normal.update({
+            'callbacks': [self.custom_callback_handler_normal] 
+        })
 
-
-        llm_answer = ChatOpenAI(
-            model_name=self.model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens_response,
-            openai_api_key=self.settings.Open_AI_API_Secret,
-        )
-
-        llm_reference = ChatOpenAI(
-            model_name=self.model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens_response,
-            openai_api_key=self.settings.Open_AI_API_Secret,
-        )
+        llm_answer = ChatOpenAI(**param_llm_answer)
+        llm_reference = ChatOpenAI(**param_llm_reference)
+        llm_normal= ChatOpenAI(**param_llm_normal)
 
         prompt_template_answer, prompt_template_reference = self.get_prompt_templates()    
-
-
-        retieval_qa_normal = ChatOpenAI(model=self.model,
-                          openai_api_key=self.settings.Open_AI_API_Secret,
-                          max_tokens=self.max_tokens_response,
-                          temperature=self.temperature)
-
-        retieval_qa_answer = RetrievalQAWithSourcesChain.from_chain_type(
+        
+        retrieval_qa_answer = RetrievalQAWithSourcesChain.from_chain_type(
             llm=llm_answer,
             chain_type="stuff",
             retriever=self.data_instance.as_retriever(),
@@ -105,7 +101,7 @@ class AI:
             }
         )
 
-        retieval_qa_reference = RetrievalQAWithSourcesChain.from_chain_type(
+        retrieval_qa_reference = RetrievalQAWithSourcesChain.from_chain_type(
             llm=llm_reference,
             chain_type="stuff",
             retriever=self.data_instance.as_retriever(),
@@ -113,38 +109,19 @@ class AI:
                 "verbose": False,
                 "prompt": prompt_template_reference
             }
-        )        
+        )           
 
-        return retieval_qa_normal, retieval_qa_answer, retieval_qa_reference
+        return llm_normal, retrieval_qa_answer, retrieval_qa_reference
 
-    def process_query(self, prompt, type):
+    def process_query(self, type, prompt):
+        print(f"process_query called with type: {type}, prompt: {prompt}")
+
         if type=="gptnormal":
-            return self.retieval_qa_normal([HumanMessage(content=prompt)])
+            self.retieval_qa_normal([HumanMessage(content=prompt)])
 
         if type=='answer':
-            return self.retieval_qa_answer({"question": prompt}, return_only_outputs=True)
+            self.retieval_qa_answer({"question": prompt}, return_only_outputs=True)
           
-        elif type=='reference':
-            return self.retieval_qa_reference({"question": prompt}, return_only_outputs=True)
-            
-
-class NormalCallbackHandler(BaseCallbackHandler):
-    def __init__(self, socketio):
-        self.socketio = socketio
-
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.socketio.emit('gptnormal_response', token)
-
-class AnswerCallbackHandler(BaseCallbackHandler):
-    def __init__(self, socketio):
-        self.socketio = socketio
-
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.socketio.emit('answer_response', token)    
-
-class ReferenceCallbackHandler(BaseCallbackHandler):
-    def __init__(self, socketio):
-        self.socketio = socketio
-
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.socketio.emit('reference_response', token)
+        if type=='reference':
+            self.retieval_qa_reference({"question": prompt}, return_only_outputs=True)
+                

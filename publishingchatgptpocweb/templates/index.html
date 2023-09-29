@@ -313,12 +313,12 @@
     <script src="{{ config['BASE_PATH'] }}/static/js/jquery.sticky.js"></script>
     <script src="{{ config['BASE_PATH'] }}/static/js/click-scroll.js"></script>
     <script src="{{ config['BASE_PATH'] }}/static/js/custom.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/powerbi-client/dist/powerbi.min.js"></script>
-    <!-- <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script> -->
     <script>
-        var BASE_PATH = "{{ config['BASE_PATH'] }}";        
+        var BASE_PATH = "{{ config['BASE_PATH'] }}";
+        var USE_WEB_SOCKET = "{{ config['USE_WEB_SOCKET'] }}";           
     </script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script id="mainScript" src="{{ config['BASE_PATH'] }}/static/js/main.js"></script>
 </body>
 </html>
