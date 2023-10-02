@@ -1,15 +1,15 @@
 import logging
 import json
 import threading
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask import Response
 from flask_socketio import SocketIO
 from core.config import PathConfig, settings
 from core.pbiembedservice import PbiEmbedService
-from scripts import ai
+from scripts import ai, file
 
 
-app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY)
+app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY, static_folder=PathConfig.STATIC_DIRECTORY)
 app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
 app.config['BASE_PATH'] ='' if settings.DEPLOYED_BASE_PATH =='/' else settings.DEPLOYED_BASE_PATH
 app.config['USE_WEB_SOCKET'] =settings.USE_WEB_SOCKET
@@ -20,8 +20,8 @@ if settings.USE_WEB_SOCKET=='true':
 
 PathConfig.init_app(app)
 # Instantiate AI
-ai_instance = ai.AI(settings, PathConfig, socketio)
-
+file_instance = file.FILES(PathConfig)
+ai_instance = ai.AI(settings, PathConfig, file_instance, socketio)
 
 # @app.before_request
 # def before_request_func():
@@ -54,10 +54,47 @@ ai_instance = ai.AI(settings, PathConfig, socketio)
 @app.route('/')
 def index():
     try:
+        ai_instance.refresh_settings_and_templates()
         return render_template('index.html')
     except Exception as e:
         logging.error(f"Exception occurred while rendering index template: {e}")
         return "An error occurred while loading the page."
+    
+@app.route('/settings')
+def evasettings():
+    try:
+        return render_template('settings.html')
+    except Exception as e:
+        logging.error(f"Exception occurred while rendering settings template: {e}")
+        return "An error occurred while loading the page."
+
+
+@app.route('/save-template', methods=['POST'])
+def save_template_route():
+    data = request.get_json()
+    file_name = data.get('fileName')
+    content = data.get('content')
+
+    message, status_code = file_instance.save_template(file_name, content)
+    return jsonify({'message': message}), status_code
+
+@app.route('/save-settings', methods=['POST'])
+def save_settings_route():
+    data = request.get_json()
+    max_token = data.get('maxToken')
+    temperature = data.get('temperature')
+
+    message, status_code = file_instance.save_settings(max_token, temperature)
+    return jsonify({'message': message}), status_code
+
+@app.route('/about')
+def about():
+    try:
+        return render_template('about.html')
+    except Exception as e:
+        logging.error(f"Exception occurred while rendering about template: {e}")
+        return "An error occurred while loading the page."
+
 
 @app.route('/health')
 def health():

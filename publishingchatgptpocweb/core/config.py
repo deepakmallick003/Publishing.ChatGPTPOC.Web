@@ -68,9 +68,11 @@ class PathConfig:
     PARENT_PATH_STR = str(PARENT_PATH)
 
     TEMPLATE_DIRECTORY = os.path.join(PARENT_PATH_STR, 'templates')
+    STATIC_DIRECTORY = os.path.join(PARENT_PATH_STR, 'static')
     DATA_DIRECTORY = os.path.join(PARENT_PATH_STR, 'data')
     MODEL_DIRECTORY = os.path.join(PARENT_PATH_STR, 'models')
     SCRIPT_DIRECTORY = os.path.join(PARENT_PATH_STR, 'scripts')
+    EVA_TEMPLATES_DIRECTORY = os.path.join(STATIC_DIRECTORY, 'eva-templates')
 
     RAW_DATA_DIRECTORY = os.path.join(DATA_DIRECTORY, 'raw')
     PROCESSED_DATA_DIRECTORY = os.path.join(DATA_DIRECTORY, 'processed')
@@ -78,8 +80,12 @@ class PathConfig:
     
     CHROMA_DB = os.path.join(MODEL_DIRECTORY, 'langchain_chroma_db_pub')
     AUDIO_FILE_PATH = os.path.join(AUDIO_DATA_DIRECTORY, 'blob.wav')
-    EVA_TEMPLATE_ANSWER_FILE_PATH = os.path.join(TEMPLATE_DIRECTORY, 'eva-template-answer.txt')
-    EVA_TEMPLATE_REFERNCE_FILE_PATH = os.path.join(TEMPLATE_DIRECTORY, 'eva-template-reference.txt')
+    
+    EVA_TEMPLATE_ANSWER_FILE_PATH = os.path.join(EVA_TEMPLATES_DIRECTORY, 'eva-template-answer.txt')
+    EVA_TEMPLATE_REFERENCE_FILE_PATH = os.path.join(EVA_TEMPLATES_DIRECTORY, 'eva-template-reference.txt')
+    EVA_TEMPLATE_ANSWER_CURRENT_FILE_PATH = os.path.join(EVA_TEMPLATES_DIRECTORY, 'eva-template-answer-current.txt')
+    EVA_TEMPLATE_REFERENCE_CURRENT_FILE_PATH = os.path.join(EVA_TEMPLATES_DIRECTORY, 'eva-template-reference-current.txt')
+    EVA_SETTINGS_FILE_PATH = os.path.join(EVA_TEMPLATES_DIRECTORY, 'eva-settings.xml')
 
     @classmethod
     def init_app(cls, app):

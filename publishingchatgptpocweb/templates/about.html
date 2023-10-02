@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>EVA for Publishing</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/templatemo-topic-listing.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/main.css" rel="stylesheet">
+    <!--
+
+    TemplateMo 590 topic listing
+
+    https://templatemo.com/tm-590-topic-listing
+
+    -->
+</head>
+
+<body id="top">
+
+    <main>
+
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="bi-journal-bookmark-fill"></i>
+                    <span>EVA for Publishing</span>
+                </a>
+
+                <div class="d-lg-none ms-auto me-4">
+                    <a href="#top" class="navbar-icon bi-person smoothscroll"></a>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-lg-5 me-lg-auto">
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll inactive" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll active" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll inactive" href="/settings">Settings</a>
+                        </li>
+                    </ul>
+                    <div class="d-none d-lg-block">
+                        <a href="#top" class="navbar-icon bi-person smoothscroll"></a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <section class="hero-section d-flex justify-content-center align-items-center" id="section_1">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-12 mx-auto">
+                        <h3 class="text-white text-center">About this Product</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="topics-detail-section section-padding" id="topics-detail">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-12 m-auto">
+                        <div class="container">
+                            <h5>Introduction:</h5>
+                            <p>
+                                The EVA (Efficient Vectorized Architecture) Project is a prototype developed for the CABI's publishing team
+                                to demonstrate the potential of Large Language Models (LLMs) in summarizing and interrogating data.
+                                The initiative was propelled with the primary objective of bridging the trust gap between humans and AI systems.
+                                This was achieved by restricting the knowledge base to a designated dataset, ensuring a controlled and transparent
+                                information handling process.
+                            </p>
+
+                            <p>
+                                A meticulously selected subset of 1,000 JATS XML (Abstract & Index) records, alongside the CABI thesaurus data
+                                from PoolParty, served as the cornerstone for this prototype. The venture was designed to exhibit the prowess of
+                                the Retrieval-Augmented Generation (RAG) approach, emphasizing the utilization of proprietary data while
+                                concurrently constraining the model's knowledge base to this specified dataset.
+                            </p>
+
+                            <h5>Core Strength:</h5>
+                            <p>
+                                The quintessence of EVA lies in its adeptness at amalgamating the document-centric nature of A&I records with
+                                the hierarchical structure of the thesaurus data. This synergy births a unique interaction, delivering responses
+                                enriched with multifaceted information. EVA's functionality extends to providing source articles, related links
+                                to the queried articles, and knowledge bank (kbnk) references from the thesaurus where applicable, fostering a
+                                comprehensive user understanding.
+                            </p>
+
+                            <h5>Operational Framework:</h5>
+                            
+                            <ol>
+                                <li>
+                                    <strong>Data Processing:</strong>
+                                    <ul>
+                                        <li>
+                                            The raw data undergoes a thorough cleaning and processing phase, morphing into succinct and
+                                            summarized documentations ready for further operations.
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Data Vectorization:</strong>
+                                    <ul>
+                                        <li>
+                                            The processed documents are transmuted into vector embeddings utilizing a graph database called Neo4J. This pivotal step translates the textual data into numerical patterns, rendering it
+                                            decipherable for a Large Language Model (LLM) like ChatGPT.
+                                            <div class="row my-4">
+                                                <div class="col-lg-6 col-md-6 col-12">
+                                                    <img src="{{ config['BASE_PATH'] }}/static/img/neo4j1.png" class="topics-detail-block-image img-fluid" alt="">
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-12">
+                                                    <img src="{{ config['BASE_PATH'] }}/static/img/neo4j1.png" class="topics-detail-block-image img-fluid" alt="">
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Inetegrating all together:</strong>
+                                    <ul>
+                                        <li>
+                                            With the infrastructure set, user inquiries are funneled to the LLM, which, through vector pattern
+                                            matching, identifies the most pertinent documents. The final response, generated based on the
+                                            closest matches, is then relayed back to the user, embodying a blend of summary, query-answering,
+                                            and related resources.
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ol>
+
+                            <p>
+                                EVA's endeavor is a shining beacon, illustrating the practicality and effectiveness of LLMs in managing,
+                                summarizing, and extracting value from large volumes of data, all while maintaining a leash of trust and control
+                                over the knowledge source. Through EVA, we envision a collaborative ecosystem where AI augments human efforts,
+                                making information handling an intuitive, enriching, and trustworthy endeavor.
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-12 mb-4 pb-2">
+                    <a class="navbar-brand" href="index.html">
+                        <i class="bi-journal-bookmark-fill"></i>
+                        <span>EVA for Publishing</span>
+                    </a>
+                </div>
+                <div class="col-lg-6 col-md-4 col-12 mt-lg-0 ms-auto">
+                    <p class="copyright-text mt-3">
+                        © Copyright 2023 CABI is a registered EU trademark
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="{{ config['BASE_PATH'] }}/static/js/jquery.min.js"></script>
+    <script src="{{ config['BASE_PATH'] }}/static/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ config['BASE_PATH'] }}/static/js/jquery.sticky.js"></script>
+    <script src="{{ config['BASE_PATH'] }}/static/js/custom.js"></script>
+</body>
+</html>

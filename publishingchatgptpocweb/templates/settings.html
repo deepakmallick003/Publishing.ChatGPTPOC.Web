@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>EVA for Publishing</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/templatemo-topic-listing.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/main.css" rel="stylesheet">
+</head>
+
+<body id="top">
+    <main>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="bi-journal-bookmark-fill"></i>
+                    <span>EVA for Publishing</span>
+                </a>
+
+                <div class="d-lg-none ms-auto me-4">
+                    <a href="#top" class="navbar-icon bi-person"></a>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-lg-5 me-lg-auto">
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll inactive" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll inactive" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll active" href="/settings">Settings</a>
+                        </li>
+                    </ul>
+                    <div class="d-none d-lg-block">
+                        <a href="#top" class="navbar-icon bi-person"></a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <section class="hero-section d-flex justify-content-center align-items-center" id="section_1">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-12 mx-auto">
+                        <h1 class="text-white text-center">EVA Settings</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="topics-detail-section mt-lg-3" id="topics-detail">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-8 col-12 m-auto">
+                        <p>In the Settings Section, you have the capability to modify instruction templates which serve as guidelines for EVA while processing user queries. These templates ensure that EVA's responses align well with the desired context, enhancing user interaction. You can modify two distinct types of templates; one for EVA’s response as an answer, and the other for the reference section. This tailored approach significantly elevates the relevance and clarity of the information provided to the users.</p>
+                        <p>The Settings Section also provides the functionality to set maximum token limits for the responses generated. Adjusting the token limits allows you to control the size of the responses, enabling more succinct answers or more elaborate explanations based on the requirements. This feature strikes a balance between verbosity and brevity, ensuring that the responses are not only accurate but also appropriately detailed. The flexibility here paves the way for a more tailored user experience, making the interaction with EVA more effective and user-friendly.</p>
+                        <blockquote>
+                            Adjusting instruction templates is like tailoring a suit. The better the fit, the smarter it looks!
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="explore-section">
+            <div class="container-fluid">
+                <div class="row">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="answer-tab" data-bs-toggle="tab" data-bs-target="#answer-tab-pane" type="button" role="tab" aria-controls="answer-tab-pane" aria-selected="true">Answers Template</button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reference-tab" data-bs-toggle="tab" data-bs-target="#reference-tab-pane" type="button" role="tab" aria-controls="reference-tab-pane" aria-selected="false" tabindex="-1">Reference Template</button>
+                        </li>
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="other-settings-tab" data-bs-toggle="tab" data-bs-target="#other-settings-tab-pane" type="button" role="tab" aria-controls="other-settings-tab-pane" aria-selected="false" tabindex="-1">Settings</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="answer-tab-pane" role="tabpanel" aria-labelledby="answer-tab" tabindex="0">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-12 mb-6 mb-lg-0">
+                                        <div class="custom-block bg-gray shadow-lg">
+                                            <div class="d-flex">
+                                                <div>
+                                                    <h5 class="mb-2">Default Template</h5>
+                                                    <code id="eva-template-answer-default" class="mb-0">
+                                                    </code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-12">
+                                        <div class="custom-block bg-gray shadow-lg">
+                                            <div class="d-flex">
+                                                <div>
+                                                    <h5 class="mb-2">Current Template</h5>
+                                                    <div id="eva-template-answer-current" class="mb-0 current-parent">
+                                                        <code id="part1">
+                                                        </code>
+                                                        <a class="bg-white" data-toggle="tooltip" data-placement="top" title="Click to Customize the Template" href="javascript:void(0)">
+                                                            <code id="part2" class="code-editable">
+                                                            </code>
+                                                        </a>
+                                                        <code id="part3">
+                                                        </code>
+                                                        <input type="hidden" id="file">
+                                                        <div class="template-button-container">
+                                                            <input type="button" id="save-button" style="display:none;" onclick="saveContent(this)" class="btn custom-btn custom-border-btn me-4" value="Save" />
+                                                            <input type="button" id="cancel-button" style="display:none;" onclick="cancelEdit(this)" class="btn custom-btn cancel-btn custom-border-btn me-4" value="Cancel" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="reference-tab-pane" role="tabpanel" aria-labelledby="reference-tab" tabindex="0">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-12">
+                                        <div class="custom-block bg-gray shadow-lg">
+                                            <div class="d-flex">
+                                                <div>
+                                                    <h5 class="mb-2">Default Template</h5>
+                                                    <code id="eva-template-reference-default" class="mb-0">
+                                                    </code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-12">
+                                        <div class="custom-block bg-gray shadow-lg">
+                                            <div class="d-flex">
+                                                <div>
+                                                    <h5 class="mb-2">Current Template</h5>
+                                                    <div id="eva-template-reference-current" class="mb-0 current-parent">
+                                                        <code id="part1">
+                                                        </code>
+                                                        <a class="bg-white" data-toggle="tooltip" data-placement="top" title="Click to Customize the Template" href="javascript:void(0)">
+                                                            <code id="part2" class="code-editable">
+                                                            </code>
+                                                        </a>
+                                                        <code id="part3">
+                                                        </code>
+                                                        <input type="hidden" id="file">
+                                                        <div class="template-button-container">
+                                                            <input type="button" id="save-button" style="display:none;" onclick="saveContent(this)" class="btn custom-btn custom-border-btn  me-4" value="Save" />
+                                                            <input type="button" id="cancel-button" style="display:none;" onclick="cancelEdit(this)" class="btn custom-btn cancel-btn custom-border-btn  me-4" value="Cancel" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="other-settings-tab-pane" role="tabpanel" aria-labelledby="other-settings-tab" tabindex="0">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-12 mt-3 mb-4 mb-lg-0">
+                                        <div class="custom-block bg-white shadow-lg">
+                                            <div class="d-flex">
+                                                <div class="mt-lg-3 mb-4">
+                                                    <h5 class="mb-2">Set Maximum Token</h5>
+                                                    <p class="mb-0">Decide the size of EVA's responses by changing this value</p>
+                                                    <div class="form-group row mt-3 mt-lg-3">
+                                                        <div class="col-sm-8">
+                                                            <input type="number" class="form-control" id="maxTokenValue" min="100" max="1500" value="100">
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex link-bottom-container">
+                                                        <a class="btn btn-info btn-sm" target="_blank" rel="noopener noreferrer" href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them">Learn More</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 col-12 mt-3 mb-4 mb-lg-0">
+                                        <div class="custom-block bg-white shadow-lg">
+                                            <div class="d-flex">
+                                                <div class="mt-lg-3 mb-4">
+                                                    <h5 class="mb-2">Set Tempertaure</h5>
+                                                    <p class="mb-0">Decide randomness of EVA's responses by changing this value</p>
+                                                    <div class="form-group row mt-3">
+                                                        <div class="col-sm-4">
+                                                            <input type="range" class="custom-range" id="sliderInput" min="0.2" max="2" step="0.1" value="1">
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <span id="temperatureValue" class="badge bg-temperature rounded-pill ms-auto">1</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex link-bottom-container">
+                                                        <a class="btn btn-info btn-sm" target="_blank" rel="noopener noreferrer" href="https://platform.openai.com/docs/api-reference/chat/create#temperature">Learn More</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="template-button-container col-lg-12 col-md-12 col-12 mt-3 mb-4 mt-lg-3">
+                                        <input type="button" id="update-settings-button" onclick="updateSettings()" class="btn custom-btn custom-border-btn me-4" value="Update" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="genericModal" tabindex="-1" role="dialog" aria-labelledby="genericModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="d-flex modal-body justify-content-center">
+                        <i class="bi-bell-fill"></i>
+                        <span id="genericModalBody" style="margin-left:5px;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-12 mb-4 pb-2">
+                    <a class="navbar-brand" href="index.html">
+                        <i class="bi-journal-bookmark-fill"></i>
+                        <span>EVA for Publishing</span>
+                    </a>
+                </div>
+                <div class="col-lg-6 col-md-4 col-12 mt-lg-0 ms-auto">
+                    <p class="copyright-text mt-3">
+                        © Copyright 2023 CABI is a registered EU trademark
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="{{ config['BASE_PATH'] }}/static/js/jquery.min.js"></script>
+    <script src="{{ config['BASE_PATH'] }}/static/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ config['BASE_PATH'] }}/static/js/jquery.sticky.js"></script>
+    <!--<script src="{{ config['BASE_PATH'] }}/static/js/click-scroll.js"></script>-->
+    <script src="{{ config['BASE_PATH'] }}/static/js/custom.js"></script>
+    <script>
+        var BASE_PATH = "{{ config['BASE_PATH'] }}";
+
+        var STATIC_PATH = "{{ url_for('static', filename='') }}";
+
+
+        window.onload = function () {
+            load_templates_and_settings('eva-template-answer.txt', 'eva-template-answer-default')
+            load_templates_and_settings('eva-template-answer-current.txt', 'eva-template-answer-current')
+            load_templates_and_settings('eva-template-reference.txt', 'eva-template-reference-default')
+            load_templates_and_settings('eva-template-reference-current.txt', 'eva-template-reference-current')
+            load_templates_and_settings('eva-settings.xml', null)
+
+            $('.current-parent a').on('click', function (event) {
+                editModeOn(this);
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $('#sliderInput').on('input', function () {
+                var sliderValue = $(this).val();
+                $('#temperatureValue').text(sliderValue);
+                $('#sliderInput').val(sliderValue);  // This line may not be necessary as the slider value is what triggered this event.
+            });
+
+            $('#maxTokenValue').on('blur', function () {
+                var value = $(this).val();
+
+                if (value === "" || isNaN(value)) {
+                    $(this).val(100);  // Reset to min if field is empty or not a number
+                    return;
+                }
+
+                value = parseInt(value, 10);
+
+                if (value < 100) {
+                    $(this).val(100);  // Set to min if below min
+                    return;
+                } else if (value > 1500) {
+                    $(this).val(1500);  // Set to max if above max
+                    return;
+                }
+            });
+        };
+
+        function load_templates_and_settings(file_name, control_id) {
+            fileUrl = STATIC_PATH + '/eva-templates/' + file_name;
+
+            fetch(fileUrl)
+                .then(response => response.text())
+                .then(data => {
+                    if (file_name === 'eva-settings.xml') {
+                        // Parse XML data
+                        var parser = new DOMParser();
+                        var xmlDoc = parser.parseFromString(data, "text/xml");
+                        var maxToken = xmlDoc.getElementsByTagName("max-token")[0].textContent;
+                        var temperature = xmlDoc.getElementsByTagName("temperature")[0].textContent;
+
+                        $('#maxTokenValue').val(maxToken);
+                        $('#temperatureValue').text(temperature);
+                        $('#sliderInput').val(temperature);
+                    }
+                    else {
+                        if (control_id.includes('current')) {
+                            var editableTagOpen = '<editable>';
+                            var editableTagClose = '</editable>';
+
+                            var startIndex = data.indexOf(editableTagOpen);
+                            var endIndex = data.indexOf(editableTagClose);
+
+                            var beforeEditable = data.substring(0, startIndex);
+                            var editableContent = data.substring(startIndex + editableTagOpen.length, endIndex);
+                            var afterEditable = data.substring(endIndex + editableTagClose.length);
+
+                            var container = document.getElementById(control_id);
+                            container.querySelector('#part1').innerText = beforeEditable;
+                            container.querySelector('#part2').innerText = editableContent;
+                            container.querySelector('#part3').innerText = afterEditable;
+                            container.querySelector('#file').value = file_name;
+
+                            defaultTemplateControls(container)
+                        }
+                        else {
+                            document.getElementById(control_id).innerText = data;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching the file:', error));
+        }
+
+        function editModeOn(anchorElement) {
+            var parentcurrent = $(anchorElement).closest('.current-parent');
+
+            var part2 = parentcurrent.find('#part2');
+            var saveButton = parentcurrent.find('#save-button');
+            var cancelButton = parentcurrent.find('#cancel-button');
+
+            // Enable contenteditable on part2
+            part2.attr('contenteditable', 'true');
+
+            // Show the save and cancel buttons
+            saveButton.show();
+            cancelButton.show();
+
+            $(anchorElement).css('cursor', 'auto');
+            $(anchorElement).off('click');  // Remove this click handler
+        }
+
+        function cancelEdit(buttonElement) {
+            var parentcurrent = $(buttonElement).closest('.current-parent');
+            defaultTemplateControls(parentcurrent);
+        }
+
+        function defaultTemplateControls(parentcurrent) {
+            var part2 = $(parentcurrent).find('#part2');
+            var saveButton = $(parentcurrent).find('#save-button');
+            var cancelButton = $(parentcurrent).find('#cancel-button');
+            var anchorTag = $(parentcurrent).find('a');
+
+            // Disable contenteditable on part2
+            part2.attr('contenteditable', 'false');
+
+            // Hide the save and cancel buttons
+            saveButton.hide();
+            cancelButton.hide();
+
+            // Re-enable the anchor tag
+            $(anchorTag).on('click', function (event) {  // Reattach the original click handler
+                editModeOn(this);
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            $(anchorTag).css('cursor', 'pointer');
+        }
+
+        function saveContent(buttonElement) {
+            var $parentElement = $(buttonElement).closest('.current-parent');
+            var $fileElement = $parentElement.find('#file');
+            var fileName = $fileElement.val(); // Retrieve the file name from the hidden field
+
+            // Get the content from each part
+            var part1Content = $parentElement.find('#part1').get(0).innerText;
+            var part2Content = $parentElement.find('#part2').get(0).innerText;
+            var part3Content = $parentElement.find('#part3').get(0).innerText;
+
+            // Combine the content with the <editable> tags
+            var fullContent = part1Content + '<editable>' + part2Content + '</editable>' + part3Content;
+
+            saveEditedContent(fileName, fullContent, $parentElement.attr('id'));
+        }
+
+        function saveEditedContent(fileName, editedContent, control_id) {
+            // Append "v1" before the file extension
+            //var newFileName = fileName.replace(/(\.[^\.]+)$/, 'v1$1');
+
+            $.ajax({
+                url: BASE_PATH + '/save-template',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ fileName: fileName, content: editedContent }),
+                success: function (data) {
+                    console.log('Success:', data);
+                    load_templates_and_settings(fileName, control_id)
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
+                }
+            });
+        }
+
+        function updateSettings() {
+            var maxToken = $('#maxTokenValue').val();
+            var temperature = $('#sliderInput').val();
+
+            var data = {
+                maxToken: maxToken,
+                temperature: temperature
+            };
+
+            $.ajax({
+                url: BASE_PATH + '/save-settings',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    console.log(response.message);
+                    showPopUp('Settings Saved Succesfully');
+                    load_templates_and_settings('eva-settings.xml', null)
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
+                }
+            });
+        }
+
+        function showPopUp(message) {
+            //$('#genericModalLabel').text(title);  // Set the title
+            $('#genericModalBody').text(message);  // Set the message
+            $('#genericModal').modal('show');  // Show the modal
+
+            setTimeout(function () {
+                $('#genericModal').modal('hide');
+            }, 2000);
+        }
+
+    </script>
+</body>
+</html>

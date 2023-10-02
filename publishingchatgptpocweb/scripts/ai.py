@@ -11,22 +11,25 @@ from scripts.handlers import LLMCallbackHandler
 
 class AI:
 
-    def __init__(self, settings, pathconfig, socketio=None):
+    def __init__(self, settings, pathconfig, file_instance, socketio=None):
         self.settings = settings
         self.pathconfig = pathconfig
         self.socketio = socketio
+        self.file_instance = file_instance
 
         # Set up the OpenAI API client
         openai.api_key = settings.Open_AI_API_Secret     
-        self.model = settings.Open_AI_Model
-        self.temperature = 0
-        self.max_tokens_response=1000
+        self.model = settings.Open_AI_Model        
         
         self.data_instance = self.init_data_instance()
         self.custom_callback_handler_normal = LLMCallbackHandler('gptnormal', self.socketio)
         self.custom_callback_handler_answer = LLMCallbackHandler('answer', self.socketio)
         self.custom_callback_handler_reference = LLMCallbackHandler('reference', self.socketio)
 
+        self.refresh_settings_and_templates()
+
+    def refresh_settings_and_templates(self):
+        self.max_tokens_response, self.temperature= self.file_instance.read_eva_settings()
         self.retieval_qa_normal, self.retieval_qa_answer, self.retieval_qa_reference = self.init_retieval_qa()    
 
     def init_data_instance(self):
@@ -44,12 +47,8 @@ class AI:
         return instance
     
     def get_prompt_templates(self):
-        with open(self.pathconfig.EVA_TEMPLATE_ANSWER_FILE_PATH, "r") as file:
-            eva_answer_template = file.read()
+        eva_answer_template, eva_reference_template = self.file_instance.read_template_files()
 
-        with open(self.pathconfig.EVA_TEMPLATE_REFERNCE_FILE_PATH, "r") as file:
-            eva_reference_template = file.read()
-        
         input_variables=["summaries", "question"]
        
         prompt_template_answer = PromptTemplate(

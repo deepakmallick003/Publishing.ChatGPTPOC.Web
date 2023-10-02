@@ -521,3 +521,121 @@ h6 {
 .timeline-container .vertical-scrollable-timeline li.active .icon-holder {
     background-color: var(--secondary-color);
 }
+
+.navbar-nav .nav-link.active, .navbar-nav .nav-link.active:hover {
+    color: var(--white-color);
+}
+
+.nav-link.inactive {
+    color: var(--primary-color);
+}
+
+.cancel-btn {
+    border: 2px solid var(--bs-danger); ;
+    color: var(--bs-danger); 
+}
+
+.cancel-btn:hover {
+    background: var(--bs-danger);
+    color: var(--white-color);
+  }
+
+.code-editable{
+    color: var(--bs-code-color);
+}
+
+.code-editable[contenteditable="true"] {
+    color: var(--secondary-color);
+}
+
+.template-button-container {
+    text-align: center;
+}
+
+[contenteditable="true"] {
+    border: none !important;
+    outline: none !important;
+}
+
+.current-parent a {
+    padding:10px;
+    border: 2px solid var(--secondary-color)
+}
+  
+.btn-info {
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-large);
+    --bs-btn-color: white;
+    --bs-btn-bg: var(--secondary-color);
+    --bs-btn-border-color: var(--secondary-color);
+    --bs-btn-hover-color: #000;
+    --bs-btn-hover-bg: var(--border-color);
+    --bs-btn-hover-border-color: var(--border-color);
+    --bs-btn-focus-shadow-rgb: 11,172,204;
+    --bs-btn-active-color: white;
+    --bs-btn-active-bg: var(--border-color);
+    --bs-btn-active-border-color: var(--border-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: white;
+    --bs-btn-disabled-bg: var(--secondary-color);
+    --bs-btn-disabled-border-color: var(--secondary-color)
+}
+
+.bg-temperature {
+    background-color: var(--secondary-color);
+}
+
+.link-bottom-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    /* left: 0; */
+    z-index: 2;
+    padding: 20px 35px;
+}
+
+
+input[type=range]{
+    -webkit-appearance: none;
+    width: 100%;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 500px;
+    height: 10px;
+    background: white;
+    border: 1px solid var(--secondary-color) !important;
+    border-radius: 3px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--secondary-color) !important;
+    margin-top: -4px;
+}
+
+.form-control:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: var(--secondary-color) !important;
+    outline: 0;
+    box-shadow: 0 0 0 .05rem var(--secondary-color) !important;
+}
+
+.bg-gray {
+    --bs-bg-opacity: 1;
+    background-color: var(--primary-color) !important;
+}
+
+.text-secondary {
+    --bs-text-opacity: 1;
+    color: rgba(var(--secondary-color),var(--bs-text-opacity)) !important;
+}
+
+.bi-bell-fill::before {
+    color: var(--secondary-color) !important;
+}
