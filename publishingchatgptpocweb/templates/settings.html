@@ -45,13 +45,13 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-lg-5 me-lg-auto">
                         <li class="nav-item">
-                            <a class="nav-link click-scroll inactive" href="/">Home</a>
+                            <a class="nav-link click-scroll inactive" href="{{ config['BASE_PATH'] }}/">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link click-scroll inactive" href="/about">About</a>
+                            <a class="nav-link click-scroll inactive" href="{{ config['BASE_PATH'] }}/about">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link click-scroll active" href="/settings">Settings</a>
+                            <a class="nav-link click-scroll active" href="{{ config['BASE_PATH'] }}/settings">Settings</a>
                         </li>
                     </ul>
                     <div class="d-none d-lg-block">
@@ -278,9 +278,6 @@
     <script>
         var BASE_PATH = "{{ config['BASE_PATH'] }}";
 
-        var STATIC_PATH = "{{ url_for('static', filename='') }}";
-
-
         window.onload = function () {
             load_templates_and_settings('eva-template-answer.txt', 'eva-template-answer-default')
             load_templates_and_settings('eva-template-answer-current.txt', 'eva-template-answer-current')
@@ -322,7 +319,7 @@
         };
 
         function load_templates_and_settings(file_name, control_id) {
-            fileUrl = STATIC_PATH + '/eva-templates/' + file_name;
+            fileUrl = BASE_PATH + '/static/eva-templates/' + file_name;
 
             fetch(fileUrl)
                 .then(response => response.text())
@@ -439,6 +436,7 @@
                 success: function (data) {
                     console.log('Success:', data);
                     load_templates_and_settings(fileName, control_id)
+                    showPopUp('Template Saved Successfully!')
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error:', errorThrown);
@@ -462,7 +460,7 @@
                 data: JSON.stringify(data),
                 success: function (response) {
                     console.log(response.message);
-                    showPopUp('Settings Saved Succesfully');
+                    showPopUp('Settings Saved Successfully!');
                     load_templates_and_settings('eva-settings.xml', null)
                 },
                 error: function (jqXHR, textStatus, errorThrown) {

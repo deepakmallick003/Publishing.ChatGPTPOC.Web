@@ -54,13 +54,13 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-lg-5 me-lg-auto">
                         <li class="nav-item">
-                            <a class="nav-link active" href="/">Home</a>
+                            <a class="nav-link click-scroll inactive" href="{{ config['BASE_PATH'] }}/">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link inactive" href="/about">About</a>
+                            <a class="nav-link click-scroll inactive" href="{{ config['BASE_PATH'] }}/about">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link inactive" href="/settings">Settings</a>
+                            <a class="nav-link click-scroll active" href="{{ config['BASE_PATH'] }}/settings">Settings</a>
                         </li>
                     </ul>
                     <div class="d-none d-lg-block">
