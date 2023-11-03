@@ -187,7 +187,7 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="text-tab-pane" role="tabpanel" aria-labelledby="design-tab" tabindex="0">
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-12 mb-6 mb-lg-0">
+                                <div class="col-lg-12 col-md-12 col-12 mb-12 mb-lg-0">
                                     <div id="gpt-normal-parent" class="custom-block bg-white shadow-lg">
                                         <div class="d-flex">
                                             <div>
@@ -198,12 +198,18 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6 col-12 mb-6 mb-lg-0">
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-12 mb-12 mb-lg-0">
                                     <div id="eva-output-parent" class="custom-block bg-white shadow-lg">
                                         <div class="d-flex">
                                             <div>
                                                 <h3 class="mb-2">EVA's Response</h3>
-                                                <br>
+                                                <div id="switchLinkBehaviourParent" class="form-check form-switch mb-2 d-flex justify-content-end">
+                                                    <input class="form-check-input" type="checkbox" id="switchLinkBehaviour">
+                                                    <label class="form-check-label" for="switchLinkBehaviour">Filter Graph</label>
+                                                </div>
                                                 <p id="eva-output" class="mb-0"></p>
                                             </div>
                                         </div>
@@ -212,7 +218,7 @@
                             </div>
                             <br>
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-12 mb-6 mb-lg-0">
+                                <!-- <div class="col-lg-6 col-md-6 col-12 mb-6 mb-lg-0">
                                     <div id="eva-links-parent" class="custom-block bg-white shadow-lg">
                                         <div class="d-flex">
                                             <div>
@@ -222,11 +228,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-12 mb-6 mb-lg-0">
+                                </div> -->
+                                <div class="col-lg-12 col-md-12 col-12 mb-12 mb-lg-0">
                                     <div id="report-container-parent" class="custom-block bg-white shadow-lg">
-                                        <div id="report-container" class="embed-container">
-                                        </div>
+                                        <!-- <div id="report-container" class="embed-container">
+                                        </div> -->
+                                        <div id="report-container" class="embed-container" tabindex="0"></div>     
                                     </div>
                                 </div>
                             </div>
@@ -291,7 +298,7 @@
             </div>
         </section>
 
-        <section class="faq-section section-padding" id="section_4">
+        <section class="faq-section section-padding" id="section_4">            
         </section>
 
         <section class="contact-section section-padding section-bg" id="section_5"  style="display: none;">
@@ -328,6 +335,9 @@
         var USE_WEB_SOCKET = "{{ config['USE_WEB_SOCKET'] }}";           
     </script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <script id="mainScript" src="{{ config['BASE_PATH'] }}/static/js/main.js"></script>
 </body>
 </html>

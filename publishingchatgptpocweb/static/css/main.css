@@ -639,3 +639,52 @@ input[type=range]::-webkit-slider-thumb {
 .bi-bell-fill::before {
     color: var(--secondary-color) !important;
 }
+
+
+
+
+
+.form-switch .form-check-input {
+    width: 2em;
+    margin-left: -2.5em;
+    border-radius: 2em;
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 .25rem var(--link-hover-color)
+}
+
+.form-check-input:checked {
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+}
+
+.form-switch .form-check-input:focus {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='%2356b546'/></svg>");
+}
+
+
+
+.form-check-input[type=checkbox]:indeterminate {
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+}
+
+.form-switch .form-check-label {
+    margin-left: 0.5em;
+    font-weight: bold;
+}
+
+#switchLinkBehaviourParent{
+    display: none !important;
+}
+
+.interactive-link {
+    cursor: pointer !important;  /* Ensure cursor remains a pointer for these anchor tags */
+}
+
+.indent-left {
+    margin-left: 20px;
+}

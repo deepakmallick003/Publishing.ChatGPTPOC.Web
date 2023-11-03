@@ -8,7 +8,6 @@ from core.config import PathConfig, settings
 from core.pbiembedservice import PbiEmbedService
 from scripts import ai, file
 
-
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY, static_folder=PathConfig.STATIC_DIRECTORY)
 app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
 app.config['BASE_PATH'] ='' if settings.DEPLOYED_BASE_PATH =='/' else settings.DEPLOYED_BASE_PATH
@@ -115,9 +114,22 @@ def getrelationsreport():
         return embed_info
     except Exception as ex:
         return json.dumps({'errorMsg': str(ex)}), 500
+    
 
+@app.route('/validatelinks', methods=['POST'])
+def validateandfixlinksintext():
+    response = {}
+    text = request.form['text']   
+    send_report_data = request.form['send_report_data']
+    try:
+        fixed_text, nodes_and_relations = ai_instance.validate_and_fix_response_urls(text, send_report_data)
+        response['text'] = fixed_text
+        response['report_data'] = nodes_and_relations
+    except Exception as ex:
+        response['text'] = text
+        response['report_data'] = None
 
-
+    return response
 
 @app.route('/get_model_response', methods=['POST'])
 def handle_get_model_response():
