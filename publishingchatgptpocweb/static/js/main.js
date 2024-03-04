@@ -72,6 +72,19 @@ function checkAuthentication() {
     return uniqueSSESessionId
 }
 
+
+function generateStaticSessionId() {
+    var length = 32;
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    result += "_" + new Date().getTime();
+    return result;
+}
+
 function SendRequestToServer(text) {  
     $("#report-container").empty();
     $(responseSections).show()
@@ -81,7 +94,8 @@ function SendRequestToServer(text) {
     inputText.value = "";
     // inputText.focus();
            
-    uniqueSSESessionId = checkAuthentication();
+    // uniqueSSESessionId = checkAuthentication();
+    uniqueSSESessionId = generateStaticSessionId();
     if (uniqueSSESessionId!=''){
         startSSE(text, uniqueSSESessionId);
     }
@@ -218,7 +232,7 @@ function populateTextWithConcepts() {
 
 function fetchSourcesAndPopulate(pans)
 {
-    checkAuthentication();
+    // checkAuthentication();
     const fd = new FormData();
     fd.append("pans", pans.join(','));
 
@@ -314,7 +328,7 @@ function showPopUp(title, message) {
 
 function rectifyResponse(text, send_report_data=false)
 {
-    checkAuthentication();
+    // checkAuthentication();
 
     $(responseSections).show()
    

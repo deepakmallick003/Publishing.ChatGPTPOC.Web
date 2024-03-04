@@ -2,79 +2,78 @@ from datetime import timedelta
 import json
 import logging
 import threading
-from flask import Flask, Response, jsonify, redirect, render_template, request, session, url_for
-from flask_session import Session
-# from werkzeug.middleware.proxy_fix import ProxyFix
-from core.auth import Auth
+# from flask import Flask, Response, jsonify, redirect, render_template, request, session, url_for
+# from flask_session import Session
+from flask import Flask, Response, render_template, request
+# from core.auth import Auth
 from core.config import PathConfig, settings
 from scripts import ai, file
 
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY, static_folder=PathConfig.STATIC_DIRECTORY)
-# app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
-app.config['SESSION_TYPE'] = settings.FLASK_SESSION_TYPE
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
-app.config['SECRET_KEY'] = settings.FLASK_SECRET_KEY
-app.secret_key = settings.FLASK_SECRET_KEY
-app.config['PREFERRED_URL_SCHEME'] = 'https'
+# app.config['SESSION_TYPE'] = settings.FLASK_SESSION_TYPE
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+# app.config['SECRET_KEY'] = settings.FLASK_SECRET_KEY
+# app.secret_key = settings.FLASK_SECRET_KEY
+# app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
 app.config['BASE_PATH'] ='' if settings.DEPLOYED_BASE_PATH =='/' else settings.DEPLOYED_BASE_PATH
 
-Session(app)
+# Session(app)
 PathConfig.init_app(app)
-auth_instance = Auth()
+# auth_instance = Auth()
 file_instance = file.FILES(PathConfig)
 ai_instance = ai.AI(settings, PathConfig, file_instance)
 
-@app.before_request
-def before_request_func():
-    open_endpoints = ['authorize', 'signin-oidc', 'get_user_oid', 'static', 'health', 'healthkubernetes']
-    if request.endpoint in open_endpoints:
-        return  
-    if 'user' not in session and request.endpoint not in open_endpoints:
-        return redirect(auth_instance.build_auth_url())
+# @app.before_request
+# def before_request_func():
+#     open_endpoints = ['authorize', 'signin-oidc', 'get_user_oid', 'static', 'health', 'healthkubernetes']
+#     if request.endpoint in open_endpoints:
+#         return  
+#     if 'user' not in session and request.endpoint not in open_endpoints:
+#         return redirect(auth_instance.build_auth_url())
 
-def custom_url_for(endpoint, **values):
-    base_url = request.url_root
-    base_path = app.config.get('BASE_PATH', '')
-    path = url_for(endpoint, **values)
-    full_url = f"{base_url.rstrip('/')}{base_path}{path}"
-    return full_url
+# def custom_url_for(endpoint, **values):
+#     base_url = request.url_root
+#     base_path = app.config.get('BASE_PATH', '')
+#     path = url_for(endpoint, **values)
+#     full_url = f"{base_url.rstrip('/')}{base_path}{path}"
+#     return full_url
 
-@app.route("/signin-oidc")
-def authorize():
-    session.permanent = True
-    session["state"] = request.args.get("state")
-    session["nonce"] = request.args.get("nonce")
-    code = request.args.get('code')
+# @app.route("/signin-oidc")
+# def authorize():
+#     session.permanent = True
+#     session["state"] = request.args.get("state")
+#     session["nonce"] = request.args.get("nonce")
+#     code = request.args.get('code')
     
-    if not code:
-        return "No code returned from Azure AD.", 400
+#     if not code:
+#         return "No code returned from Azure AD.", 400
     
-    cache = auth_instance.load_cache()
+#     cache = auth_instance.load_cache()
     
-    result = auth_instance.build_msal_app(cache=cache).acquire_token_by_authorization_code(
-        code,
-        scopes=[],  
-        redirect_uri=auth_instance.get_auth_redirect_uri())
-    auth_instance.save_cache(cache)
+#     result = auth_instance.build_msal_app(cache=cache).acquire_token_by_authorization_code(
+#         code,
+#         scopes=[],  
+#         redirect_uri=auth_instance.get_auth_redirect_uri())
+#     auth_instance.save_cache(cache)
 
-    if "error" in result:
-        return f"Authentication error: {result['error']}.", 500
+#     if "error" in result:
+#         return f"Authentication error: {result['error']}.", 500
 
-    user = result.get("id_token_claims")
-    session["user"] = user['oid']
-    session["user_name"] = user['name']
-    session["user_email"] = user['preferred_username']
+#     user = result.get("id_token_claims")
+#     session["user"] = user['oid']
+#     session["user_name"] = user['name']
+#     session["user_email"] = user['preferred_username']
 
-    return redirect(custom_url_for('index'))
+#     return redirect(custom_url_for('index'))
 
-@app.route('/get_user_oid')
-def get_user_oid():
-    if 'user' in session:
-        return jsonify(oid=session['user']), 200
-    else:
-        return jsonify(error='User not authenticated', auth_url=auth_instance.build_auth_url()), 401
+# @app.route('/get_user_oid')
+# def get_user_oid():
+#     if 'user' in session:
+#         return jsonify(oid=session['user']), 200
+#     else:
+#         return jsonify(error='User not authenticated', auth_url=auth_instance.build_auth_url()), 401
 
 @app.route('/')
 def index():
