@@ -36,6 +36,7 @@ class Auth:
         redirect_uri=url_for("authorize", _external=True)
         if settings.DEPLOYED_BASE_PATH not in redirect_uri:
             redirect_uri = redirect_uri.replace(self.AzureAd_Redirect_Path, settings.DEPLOYED_BASE_PATH + self.AzureAd_Redirect_Path)
+            redirect_uri = redirect_uri.replace("http", "https")
         return redirect_uri
 
     def build_auth_url(self, authority=None, scopes=None, state=None, to_go=None):
