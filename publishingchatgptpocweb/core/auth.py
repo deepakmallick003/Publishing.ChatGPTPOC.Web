@@ -32,6 +32,10 @@ class Auth:
             token_cache=cache)
 
     def build_auth_url(self, authority=None, scopes=None, state=None, to_go=None):
+        redirect_uri=url_for("authorize", _external=True)
+        if settings.DEPLOYED_BASE_PATH not in redirect_uri:
+            redirect_uri = redirect_uri.replace(self.AzureAd_Redirect_Path, settings.DEPLOYED_BASE_PATH + self.AzureAd_Redirect_Path)
+
         return self.build_msal_app(authority=authority).get_authorization_request_url(
             scopes or [],
             state=state or str(uuid.uuid4()),
