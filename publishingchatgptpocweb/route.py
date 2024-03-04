@@ -13,6 +13,7 @@ app.config['SESSION_TYPE'] = settings.FLASK_SESSION_TYPE
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 app.config['SECRET_KEY'] = settings.FLASK_SECRET_KEY
 app.secret_key = settings.FLASK_SECRET_KEY
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 app.config['BASE_PATH'] = settings.DEPLOYED_BASE_PATH
 app.config['BASE_PATH'] ='' if settings.DEPLOYED_BASE_PATH =='/' else settings.DEPLOYED_BASE_PATH

@@ -26,6 +26,7 @@ COPY publishingchatgptpocweb/. ./
 
 # Expose the port the app runs in
 EXPOSE 80
+EXPOSE 443
 
 # Run the application
 CMD ["gunicorn", "-b", "0.0.0.0:80", "route:app"]
