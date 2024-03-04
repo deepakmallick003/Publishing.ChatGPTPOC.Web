@@ -14,4 +14,3 @@ flask-azure-oauth==0.7.0
 msal==1.23.0
 Flask-Session==0.6.0
 spacy>=3.7.4
-Werkzeug
