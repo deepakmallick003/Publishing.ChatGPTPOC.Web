@@ -4,11 +4,13 @@ import logging
 import threading
 from flask import Flask, Response, jsonify, redirect, render_template, request, session, url_for
 from flask_session import Session
+from werkzeug.middleware.proxy_fix import ProxyFix
 from core.auth import Auth
 from core.config import PathConfig, settings
 from scripts import ai, file
 
 app = Flask(__name__, template_folder=PathConfig.TEMPLATE_DIRECTORY, static_folder=PathConfig.STATIC_DIRECTORY)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 app.config['SESSION_TYPE'] = settings.FLASK_SESSION_TYPE
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 app.config['SECRET_KEY'] = settings.FLASK_SECRET_KEY
