@@ -34,6 +34,13 @@ def before_request_func():
     if 'user' not in session and request.endpoint not in open_endpoints:
         return redirect(auth_instance.build_auth_url())
 
+def custom_url_for(endpoint, **values):
+    base_url = request.url_root
+    base_path = app.config.get('BASE_PATH', '')
+    path = url_for(endpoint, **values)
+    full_url = f"{base_url.rstrip('/')}{base_path}{path}"
+    return full_url
+
 @app.route("/signin-oidc")
 def authorize():
     session.permanent = True
@@ -60,7 +67,7 @@ def authorize():
     session["user_name"] = user['name']
     session["user_email"] = user['preferred_username']
 
-    return redirect(url_for('index'))
+    return redirect(custom_url_for('index'))
 
 @app.route('/get_user_oid')
 def get_user_oid():

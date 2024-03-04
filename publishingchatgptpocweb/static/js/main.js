@@ -56,7 +56,7 @@ function checkAuthentication() {
     var uniqueSSESessionId='';
     
     $.ajax({
-        url: '/get_user_oid',
+        url: BASE_PATH + "/get_user_oid",
         async: false,
         method: 'GET',
         success: function(response) {
