@@ -42,10 +42,11 @@ def authorize():
         return "No code returned from Azure AD.", 400
     
     cache = auth_instance.load_cache()
+    
     result = auth_instance.build_msal_app(cache=cache).acquire_token_by_authorization_code(
         code,
-        scopes=[],  # Update with your scopes
-        redirect_uri=url_for("authorize", _external=True))
+        scopes=[],  
+        redirect_uri=auth_instance.get_auth_redirect_uri())
     auth_instance.save_cache(cache)
 
     if "error" in result:
