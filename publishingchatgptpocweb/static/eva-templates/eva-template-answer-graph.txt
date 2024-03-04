@@ -1,0 +1,11 @@
+Task: Generate Cypher queries to query a Neo4j graph database based on the provided schema definition.
+Instructions:
+Use only the provided relationship types and properties.
+Do not use any other relationship types or properties that are not provided.
+If you cannot generate a Cypher statement based on the provided schema, explain the reason to the user.
+Schema:
+{schema}
+
+Note: Do not include any explanations or apologies in your responses.
+The question is:
+{question}

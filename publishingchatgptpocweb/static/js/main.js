@@ -1,18 +1,24 @@
 const inputText = document.getElementById("message");
-const chatLog = document.getElementById("chat-log");
-
-const gptNormalControl = document.getElementById("gpt-normal");
-const evaResponseControl = document.getElementById("eva-output");
-const evaLinksControl = document.getElementById("eva-links");
+const evaResponseControl = document.getElementById("eva-answer");
+const evaReferenceControl = document.getElementById("eva-reference");
 const responseSections = document.getElementById("section_2");
+const cabtBaseUri = "https://id.cabi.org/cabt/"
+const cabidigitallibraryBaseUri = "https://www.cabidigitallibrary.org/doi/10.5555/"
+let answerEventSource;
+let referenceEventSource;
+let globalConceptsDict = {};
+let incompleteSummary = "";
 
 
-//const socket = io.connect('http://localhost:5000');
-//const socket = io.connect(window.location.protocol + "//" + window.location.host, { path: '/socket.io' });
-let socket = null;
-if(USE_WEB_SOCKET === 'true'){
-    socket = io.connect(window.location.protocol + "//" + window.location.host, { path: BASE_PATH + '/socket.io' });
-}
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $('.model-parameters-sliders').on('input', function () {
+        var sliderValue = $(this).val();
+        $(this).closest('.form-group').find('.model-parameters-value').text(sliderValue);
+        $(this).val(sliderValue);  // This line may not be necessary as the slider value is what triggered this event.
+    });
+});
 
 // Send message on enter key press
 inputText.addEventListener("keydown", (event) => {
@@ -22,6 +28,10 @@ inputText.addEventListener("keydown", (event) => {
         $('#user-question').text(message);
         SendRequestToServer(message);
     }
+});
+
+window.addEventListener("beforeunload", function() {
+    closeSSE()
 });
 
 $('#switchLinkBehaviour').on('change', function() {
@@ -34,8 +44,6 @@ $('#switchLinkBehaviour').on('change', function() {
     }
 });
 
-
-
 $(".example-questions").on("click", function(event) {
     event.preventDefault();
     const message = $(this).find('p.text-white').text().trim();
@@ -43,353 +51,271 @@ $(".example-questions").on("click", function(event) {
     SendRequestToServer(message)
 });
 
+function checkAuthentication() {
+    
+    var uniqueSSESessionId='';
+    
+    $.ajax({
+        url: '/get_user_oid',
+        async: false,
+        method: 'GET',
+        success: function(response) {
+            uniqueSSESessionId = `${response.oid}_${new Date().getTime()}`;
+        },
+        error: function(xhr) {
+            if (xhr.status === 401) {
+                window.location.href = xhr.responseJSON.auth_url;
+            }
+        }
+    });
+
+    return uniqueSSESessionId
+}
+
 function SendRequestToServer(text) {  
     $("#report-container").empty();
     $(responseSections).show()
-    $(gptNormalControl).html('');
     $(evaResponseControl).html('');
-    $(evaLinksControl).html('');    
-
+    
     showLoader();
     inputText.value = "";
-    inputText.focus();
-
-    if(USE_WEB_SOCKET === 'true'){
-        const fd = new FormData();
-        fd.append("text", text);
-        get_model_response_socket(fd)
-    }
-    else{        
-        // const fdGptNormal = new FormData();
-        // fdGptNormal.append("text", text);
-        // fdGptNormal.append("type", "gptnormal");  
-        // get_model_response_ajax(fdGptNormal)
-        
-        // const fdAnswer = new FormData();
-        // fdAnswer.append("text", text);
-        // fdAnswer.append("type", "answer");  
-        // get_model_response_ajax(fdAnswer)
-        
-        // const fdReference = new FormData();
-        // fdReference.append("text", text);
-        // fdReference.append("type", "reference");  
-        // get_model_response_ajax(fdReference)
-
-        get_model_response_sse("answer", text)
-        // get_model_response_sse("reference", text)
-        get_model_response_sse("gptnormal", text)
+    // inputText.focus();
+           
+    uniqueSSESessionId = checkAuthentication();
+    if (uniqueSSESessionId!=''){
+        startSSE(text, uniqueSSESessionId);
     }
 }
 
-function get_model_response_ajax(fd)
+function closeSSE(){
+    if (answerEventSource !== undefined && answerEventSource !== null) {
+        answerEventSource.close();
+        answerEventSource = null;
+    }
+}
+
+function startSSE(text, uniqueSSESessionId) {
+    closeSSE()
+    let answerEventSource = null;
+    let extractedPANS = [];
+    incompleteSummary = "";
+    globalConceptsDict = {};
+    $(evaResponseControl).html('');
+    $(evaReferenceControl).html('');
+
+    var temperature = $('#temperSlider').val();
+    var frequency_penalty = $('#freqPenSlider').val();
+    var presence_penalty = $('#presPenSlider').val();
+
+    answerEventSource = new EventSource(`${BASE_PATH}/get_answer_sse?text=${text}&temperature=${temperature}&frequency_penalty=${frequency_penalty}&presence_penalty=${presence_penalty}&sessionId=${uniqueSSESessionId}`);
+
+    answerEventSource.addEventListener('llmstream', function(event) {
+        const eventData = JSON.parse(event.data);
+        if(eventData.sessionId === uniqueSSESessionId){
+            if(eventData.status === 'complete') {
+                answerEventSource.close();
+                hideLoader('answer');
+                fetchAndUpdateConceptDict()
+                populateTextWithConcepts()
+                fetchSourcesAndPopulate(extractedPANS)
+            } else {
+                incompleteSummary += eventData.response;
+                $(evaResponseControl).html(incompleteSummary);
+
+                fetchAndUpdateConceptDict()
+                if(extractedPANS.length==0){
+                    extractedPANS = extractPANSFromSummary()
+                }
+            }
+        }
+        else{
+            answerEventSource.close();
+        }
+    });
+
+    answerEventSource.addEventListener('error', function(event) {
+        debugger;
+        const errorData = JSON.parse(event.data);
+        if(errorData.sessionId === uniqueSSESessionId){            
+            answerEventSource.close();
+            hideLoader('answer');
+            hideLoader('reference');
+            console.error(errorData.message);
+            showPopUp('Error', errorData.message)
+        }
+    });
+}
+
+function extractPANSFromSummary() {
+    let extractedSources = [];
+    const sourceTagPattern = /<sources>(.*?)<\/sources>/gs;
+    const matches = [...incompleteSummary.matchAll(sourceTagPattern)];
+    matches.forEach(match => {
+        // Split by new line or comma followed by optional whitespace
+        const pans = match[1].split(/\s*,\s*|\n+/).filter(pan => pan.match(/^\d+$/));
+        extractedSources.push(...pans);
+    });
+    return extractedSources;
+}
+
+
+// Tracks sentences that have been processed
+let lastSentences = new Set(); 
+function fetchAndUpdateConceptDict() {
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(incompleteSummary, 'text/html');
+    let paragraphs = doc.querySelectorAll('p');
+    let allText = Array.from(paragraphs).map(p => p.textContent).join(' ');
+    
+    // Split the text into sentences. This simple split might need refinement for more complex text structures.
+    let sentences = allText.match(/[^.!?]+[.!?]/g) || [];
+
+    // Find new sentences that haven't been processed
+    let newSentences = sentences.filter(sentence => !lastSentences.has(sentence.trim()));
+    
+    // Process each new sentence sequentially
+    newSentences.forEach(sentence => {
+        if (sentence.trim()) {
+            lastSentences.add(sentence.trim()); // Mark this sentence as processed
+
+            const fd = new FormData();
+            fd.append("text", sentence);
+
+            $.ajax({
+                url: BASE_PATH + "/fetchconcepts",
+                type: "POST",
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    Object.assign(globalConceptsDict, response.concepts);
+                    populateTextWithConcepts();
+                },
+                error: function (err) {
+                    // Handle error
+                }
+            });
+        }
+    });
+}
+
+
+function populateTextWithConcepts() {
+
+    // Iterate through the global concepts dictionary
+    Object.keys(globalConceptsDict).forEach(concept => {
+        const conceptSource = globalConceptsDict[concept];
+        const anchorTag = `<a href="${cabtBaseUri + conceptSource}" target="_blank">${concept}</a>`;
+        const escapedConcept = concept.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(escapedConcept, 'g');
+
+        incompleteSummary = incompleteSummary.replace(regex, anchorTag);
+    });
+
+    $(evaResponseControl).html(incompleteSummary);
+}
+
+
+function fetchSourcesAndPopulate(pans)
 {
+    checkAuthentication();
+    const fd = new FormData();
+    fd.append("pans", pans.join(','));
+
     $.ajax({
-        url: BASE_PATH+ '/get_model_response',
+        url: BASE_PATH + "/fetchsources",
         type: "POST",
         data: fd,
         processData: false,
         contentType: false,
-        success: function(response) {
-            if (response.status === "full response complete") 
-            {                
-                if(response.type=='answer')
-                {
-                    $(evaResponseControl).html(response.text);
-                    let filterURIParameter = extractLinks(response.text);
-                    if (filterURIParameter) {
-                        showRelationsReport(filterURIParameter);
-                    }
-                }
-                else if(response.type=='reference')
-                {
-                    $(evaLinksControl).html(response.text);
-                }
-                else if(response.type=='gptnormal')
-                {
-                    $(gptNormalControl).html(response.text);
-                }
-                
-            }
-            else if (response.status === 'error')  {
-                console.log(`error loading response for Type ${response.type}:`, response.text);
-            }
-
-            hideLoader(response.type);
+        success: function (response) {
+            populateSources(response.sources)
         },
-        error: function(xhr) {
-            console.log(`error occurred:`, xhr.responseText);
+        error: function (err) {
         }
     });
 }
 
-function get_model_response_socket(fd)
-{
-    let text = fd.get('text');
-    let incompleteMessageGPTNormal = "";
-    let incompleteMessageAnswer = "";
-    let incompleteMessageReference = "";
-    $(gptNormalControl).html('');
-    $(evaResponseControl).html('');
-    $(evaLinksControl).html('');
+function populateSources(sources){
+    var $template = $('#reference-template').clone().removeAttr('id').show(); // Clone and prepare the template
 
-    socket.emit('get_normal_request', { text: text });
-    socket.emit('get_answer_request', { text: text });
-    socket.emit('get_reference_request', { text: text });
-    
-    // Remove the previous listener
-    socket.off('answer_response');  
-    socket.off('reference_response');  
-    socket.off('gptnormal_response');
-    
-    socket.on('answer_response', function(response) {
-        if (response.status === 'full response complete') {
-            hideLoader('answer');
-            let filterURIParameter = extractLinks(incompleteMessageAnswer);
-            if (filterURIParameter) {
-                showRelationsReport(filterURIParameter);
+    sources.forEach(function(source) {
+        // Clone the template for each source
+        var $reference = $template.clone(); 
+        // Populate the cloned template with source data
+        $reference.find('.title-text').text(source['Title']);
+        $reference.find('.title-text').attr('title', source['Title']);
+        $reference.find('.title-anchor').attr('href', cabidigitallibraryBaseUri + source['PAN']);
+        $reference.find('.publisher').append(source['Publisher Name'] + ', ' + source['Publishing Date']);
+        source['Authors'].forEach(function(author) {
+            var badge = $('<span></span>')
+                .addClass('badge bg-secondary')
+                .text(author);
+            $reference.find('.authors').append(badge);
+        });
+        
+        $reference.find('.location').append(source['Publisher Location']);
+        $reference.find('.summary-text').text(source['Abstract Summary']);
+
+        // Append the populated template to the container
+        $(evaReferenceControl).append($reference);
+    });
+
+    $('.toggle-summary').on('click', function() {
+        $('.summary-text').not($(this).closest('.card').find('.summary-text')).slideUp();
+        $(this).closest('.card').find('.summary-text').slideToggle(function() {
+            if ($(this).is(':visible')) {
+                $('.toggle-summary').text('Show Summary');
+                $(this).closest('.card').find('.toggle-summary').text('Hide Summary');
+            } else {
+                $(this).closest('.card').find('.toggle-summary').text('Show Summary');
             }
-        } else {
-            incompleteMessageAnswer += response.text;
-            $(evaResponseControl).html(incompleteMessageAnswer);
-        }
-    });
-    
-    socket.on('reference_response', function(response) {
-        if (response.status === 'full response complete') {
-            hideLoader('reference');
-        } else {
-            incompleteMessageReference += response.text;
-            $(evaLinksControl).html(incompleteMessageReference);
-        }
+        });
     });
 
-    socket.on('gptnormal_response', function(response) {
-        if (response.status === 'full response complete') {
-            hideLoader('gptnormal');            
-        } else {
-            incompleteMessageGPTNormal += response.text;
-            $(gptNormalControl).html(incompleteMessageGPTNormal);
-        }
-    });
-
+    hideLoader('reference');
 }
-
-
-function get_model_response_sse(type, text) {
-    let currentEventSource = null;
-    let incompleteMessageGPTNormal = "";
-    let incompleteMessageAnswer = "";
-    let incompleteMessageReference = "";
-    $(gptNormalControl).html('');
-    $(evaResponseControl).html('');
-    $(evaLinksControl).html('');
-
-    // Close the existing connection, if any
-    if (currentEventSource !== null) {
-        currentEventSource.close();
-    }
-
-    currentEventSource = new EventSource(`${BASE_PATH}/get_model_response_sse?type=${type}&text=${text}`);
-
-    // Define a callback for messages of type 'gptnormal'
-    currentEventSource.addEventListener('gptnormal', function(event) {     
-        const eventData = JSON.parse(event.data);
-        if(eventData.status === 'complete') {
-            hideLoader('gptnormal');
-            currentEventSource.close();
-        }
-        else{
-            incompleteMessageGPTNormal += eventData.response;
-            $(gptNormalControl).html(incompleteMessageGPTNormal);
-        }
-    });
-
-    // Define a callback for messages of type 'answer'
-    currentEventSource.addEventListener('answer', function(event) {
-        const eventData = JSON.parse(event.data);
-        if(eventData.status === 'complete') {
-            currentEventSource.close();
-            
-            rectifyResponse(incompleteMessageAnswer, send_report_data=true)
-            hideLoader('answer');
-            $('#switchLinkBehaviourParent').attr('style', 'display: flex !important');
-            hideLoader('report')
-        } else {
-            incompleteMessageAnswer += eventData.response;
-            $(evaResponseControl).html(incompleteMessageAnswer);
-        }
-    });
-
-    // // Define a callback for messages of type 'reference'
-    // currentEventSource.addEventListener('reference', function(event) {
-    //     const eventData = JSON.parse(event.data);
-    //     if(eventData.status === 'complete') {
-    //         hideLoader('reference');
-    //         currentEventSource.close();
-    //     }
-    //     else{
-    //         incompleteMessageReference += eventData.response;
-    //         $(evaLinksControl).html(incompleteMessageReference);
-    //     }
-    // });
-}
-
-
-
 
 
 function showLoader() {
-    $('.loader').remove();
-    var loaderHTML = '<div class="loader"></div>';
-    $('#gpt-normal-parent').append(loaderHTML);
-    $('#eva-output-parent').append(loaderHTML);
-    $('#eva-links-parent').append(loaderHTML);
-    $('#report-container-parent').append(loaderHTML);
+   $('.loader').remove();
+   var loaderHTML = '<div class="loader"></div>';
+   $('#eva-answer-parent').append(loaderHTML);
+   $('#eva-reference-parent').append(loaderHTML);
+   // $('#report-container-parent').append(loaderHTML);
 }
 
 function hideLoader(type) {
-    switch(type)
-    {
-        case 'gptnormal':
-            $('#gpt-normal-parent').find('.loader').remove();
-            break;
-        case 'answer':
-            $('#eva-output-parent').find('.loader').remove();
-            break;
-        case 'reference':
-            $('#eva-links-parent').find('.loader').remove();
-            break;
-        case 'report':
-            $('#report-container-parent').find('.loader').remove();
-            break;
-        default:
-            $('.loader').remove();
-    }
+   switch(type)
+   {
+       case 'answer':
+           $('#eva-answer-parent').find('.loader').remove();
+           break;
+       case 'reference':
+               $('#eva-reference-parent').find('.loader').remove();
+               break;
+       case 'report':
+           $('#report-container-parent').find('.loader').remove();
+           break;
+       default:
+           $('.loader').remove();
+   }
 }
 
-function extractLinks(text) {
-    // Step 1: Extract all links matching the specified patterns
-    const linkPattern = /https:\/\/www\.cabidigitallibrary\.org\/doi\/10\.5555\/\d+|https:\/\/id\.cabi\.org\/cabt\/\d+/g;
-    const links = text.match(linkPattern);
-    
-    if (!links) {
-        return '';
-    }
-    
-    // Step 2: Remove duplicate links by converting the array to a Set and then back to an array
-    const uniqueLinks = [...new Set(links)];
-    
-    return uniqueLinks
-}
+function showPopUp(title, message) {
+    $('#genericModalLabel').text(title);  // Set the title
+    $('#genericModalBody').text(message);  // Set the message
+    $('#genericModal').modal('show');  // Show the modal
 
-function showRelationsReport(filterURIParameter)
-{
-    $.ajax({
-        type: "GET",
-        url: BASE_PATH + "/getrelationsreport",
-        dataType: "json",
-        success: function (data) {
-
-            var reportContainer = $("#report-container").get(0);
-
-            try {
-                // Attempt to get the existing PowerBI component
-                var existingReport = powerbi.get(reportContainer);
-                // If a component is retrieved, reset it to clear previous reports
-                if (existingReport) {
-                    powerbi.reset(reportContainer);
-                }
-            } catch (error) {
-            }
-
-            // Initialize iframe for embedding report
-            powerbi.bootstrap(reportContainer, { type: "report" });
-            var models = window["powerbi-client"].models;
-            var reportLoadConfig = {
-                type: "report",
-                tokenType: models.TokenType.Embed,
-                settings: {
-                    filterPaneEnabled: false,
-                    navContentPaneEnabled: false
-                }
-            };
-
-            embedData = $.parseJSON(JSON.stringify(data));
-            reportLoadConfig.accessToken = embedData.accessToken;
-            // You can embed different reports as per your need
-            reportLoadConfig.embedUrl = embedData.reportConfig[0].embedUrl;
-
-            // Use the token expiry to regenerate Embed token for seamless end user experience
-            // Refer https://aka.ms/RefreshEmbedToken
-            tokenExpiry = embedData.tokenExpiry;
-
-            // Embed Power BI report when Access token and Embed URL are available
-            var report = powerbi.embed(reportContainer, reportLoadConfig);
-
-            // // Define your filter here
-            var filter = {
-                $schema: "http://powerbi.com/product/schema#basic",
-                target: {
-                    table: "Relations",
-                    column: "URI"
-                },
-                operator: "In",
-                values: filterURIParameter // Your filter values as an array
-            };
-
-            // Triggers when a report schema is successfully loaded
-            report.on("loaded", function () {
-                hideLoader('report')
-                console.log("Report load successful");   
-                $('#report-container').show();
-
-                // // Set the filters after the report has loaded
-                report.getFilters()
-                .then(filters => {
-                    filters.push(filter);
-                    return report.setFilters(filters);
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-            });
-
-            // Triggers when a report is successfully embedded in UI
-            report.on("rendered", function () {
-                hideLoader('report')
-                console.log("Report render successful");                
-            });
-
-            // Clear any other error handler event
-            report.off("error");
-
-            // Below patch of code is for handling errors that occur during embedding
-            report.on("error", function (event) {
-                hideLoader('report')
-                var errorMsg = event.detail;
-                // Use errorMsg variable to log error in any destination of choice
-                console.error(errorMsg);
-                return;
-            });
-        },
-        error: function (err) {
-            // Show error container
-            // var errorContainer = $(".error-container");
-            // $(".embed-container").hide();
-            // errorContainer.show();
-
-            // // Format error message
-            // var errMessageHtml = "<strong> Error Details: </strong> <br/>" + $.parseJSON(err.responseText)["errorMsg"];
-            // errMessageHtml = errMessageHtml.split("\n").join("<br/>")
-
-            // // Show error message on UI
-            // errorContainer.html(errMessageHtml);
-        }
-    });
+    // setTimeout(function () {
+    //     $('#genericModal').modal('hide');
+    // }, 3000);
 }
 
 function rectifyResponse(text, send_report_data=false)
 {
+    checkAuthentication();
+
     $(responseSections).show()
    
     const fd = new FormData();
@@ -416,6 +342,21 @@ function rectifyResponse(text, send_report_data=false)
     });
 }
 
+function extractLinks(text) {
+    // Step 1: Extract all links matching the specified patterns
+    const linkPattern = /https:\/\/www\.cabidigitallibrary\.org\/doi\/10\.5555\/\d+|https:\/\/id\.cabi\.org\/cabt\/\d+/g;
+    const links = text.match(linkPattern);
+    
+    if (!links) {
+        return '';
+    }
+    
+    // Step 2: Remove duplicate links by converting the array to a Set and then back to an array
+    const uniqueLinks = [...new Set(links)];
+    
+    return uniqueLinks
+}
+
 
 let fdg_data, fdg_width, fdg_height, fdg_svg, fdg_zoomBehavior, fdg_zoom_scale;
 
@@ -432,7 +373,7 @@ function processGraphData(report_data)
             nodesData.push({
                 id: item.node.source,
                 title: item.node.title,
-                document_type: item.node.document_type
+                document_type: item.node.type
             });
             nodeSet.add(item.node.title);
         }
@@ -440,7 +381,7 @@ function processGraphData(report_data)
             nodesData.push({
                 id: item.connected_node.source,
                 title: item.connected_node.title,
-                document_type: item.connected_node.document_type 
+                document_type: item.connected_node.type 
             });
             nodeSet.add(item.connected_node.title);
         }
@@ -504,12 +445,12 @@ function createForcedDirectedGraph(data) {
         .selectAll("circle")
         .data(nodes)
         .join("circle")
-        // .attr("stroke", d => d.document_type === "article" ? "rgb(60, 60, 67)" : "hsl(20 85% 57%)" )
-        .attr("r", d => d.document_type === "article" ? 10 : 5)  // Articles are bigger, adjust sizes as needed
+        // .attr("stroke", d => d.type === "article" ? "rgb(60, 60, 67)" : "hsl(20 85% 57%)" )
+        .attr("r", d => d.type === "article" ? 10 : 5)  // Articles are bigger, adjust sizes as needed
         .attr("fill", d => {
-            if (d.document_type === "article") {
+            if (d.type === "article") {
                 return "hsl(20 85% 57%)";  // Color for articles
-            } else if (d.document_type === "concept") {
+            } else if (d.type === "concept") {
                 return "rgb(60, 60, 67)";  // Color for concepts
             } else {
                 return color(d.group);  // Default color
@@ -524,7 +465,7 @@ function createForcedDirectedGraph(data) {
     .attr("font-size", "1.5px") 
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
-    .attr("fill", d => d.document_type === "concept" ? "#ccc" : "#000")
+    .attr("fill", d => d.type === "concept" ? "#ccc" : "#000")
     .style("cursor", "default");  
     
     const edgeLabels = g.append("g")
@@ -613,9 +554,8 @@ function createForcedDirectedGraph(data) {
     }
 }
 
-
 function activateInteractiveMode() {
-    $('#eva-output a').each(function() {
+    $('#eva-answer a').each(function() {
         let nodeId = $(this).attr('href');
         $(this).removeAttr('href')
             .data('originalHref', nodeId)
@@ -659,9 +599,3 @@ function zoomIntoNode(d) {
                 .scale(scale)
         );
 }
-
-
-
-
-// text = 'A global health risk framework could potentially mitigate the impact of future outbreaks of diseases like <a href="https://id.cabi.org/cabt/301097">Ebola haemorrhagic fever</a> by facilitating the study of disease transmission, diagnosis, and proper containment of the ill. It could also aid in vaccine development. This framework would be crucial in the event of another Ebola-like disease outbreak. It could also be beneficial in the context of international collaboration, which is critical for tackling the emerging challenges of various diseases. The potential areas of cooperation could include biomedical and health research such as advanced capacity in genomics, proteomics, and modern biology, as well as the establishment of public and private clinical services. The strength of certain countries in areas like generic drugs, vaccine supply, open source drug discovery, and development could be vital for improving the healthcare sector in other countries. Targeted intervention in disease prevention and mitigation could contribute significantly to the provision of healthcare services. Entrepreneurship platforms, incubators, product development partnerships, early stage development R&amp;D, and similar innovative health strategies could lift the burden of diseases.<br><h5>Source Articles</h5><ul><li><a href="https://www.cabidigitallibrary.org/doi/10.5555/20183000178">The ebola epidemic in West Africa: proceedings of a workshop</a></li><li><a href="https://www.cabidigitallibrary.org/doi/10.5555/20183026231">Health sector cooperation in Asia Africa Growth Corridor</a></li></ul>'
-// rectifyResponse(text)

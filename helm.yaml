@@ -22,8 +22,12 @@ applications:
             nameAs: PublishingChatGPT_Open_AI_API_Secret                
           - key: publishingchatgpt-open-ai-model
             nameAs: PublishingChatGPT_Open_AI_Model
-          - key: publishingchatgpt-flask-env
-            nameAs: PublishingChatGPT_FLASK_ENV
+          - key: publishingchatgpt-open-ai-embedding-model
+            nameAs: PublishingChatGPT_Open_AI_Embedding_Model
+          - key: publishingchatgpt-open-ai-embedding-dimensions
+            nameAs: PublishingChatGPT_Open_AI_Embedding_Dimensions
+          - key: publishingchatgpt-open-ai-max_token
+            nameAs: PublishingChatGPT_Open_AI_Max_Token
           - key: publishingchatgpt-neo4j_primaryindexname
             nameAs: PublishingChatGPT_Neo4J_PrimaryIndexName
           - key: publishingchatgpt-neo4j_url
@@ -34,21 +38,9 @@ applications:
             nameAs: PublishingChatGPT_Neo4J_UserName
           - key: publishingchatgpt-neo4j_password
             nameAs: PublishingChatGPT_Neo4J_Password
-          - key: publishingchatgpt-pbi_workspace_id
-            nameAs: PublishingChatGPT_PBI_WORKSPACE_ID
-          - key: publishingchatgpt-pbi_report_id_kg
-            nameAs: PublishingChatGPT_PBI_REPORT_ID_KG
-          - key: publishingchatgpt-pbi_report_id_hm
-            nameAs: PublishingChatGPT_PBI_REPORT_ID_HM
-          - key: publishingchatgpt-pbi_tenant_id
-            nameAs: PublishingChatGPT_PBI_TENANT_ID
-          - key: publishingchatgpt-pbi_client_id
-            nameAs: PublishingChatGPT_PBI_CLIENT_ID    
-          - key: publishingchatgpt-pbi_client_secret
-            nameAs: PublishingChatGPT_PBI_CLIENT_SECRET  
-          - key: publishingchatgpt-pbi_user
-            nameAs: PublishingChatGPT_PBI_USER  
-          - key: publishingchatgpt-pbi_password
-            nameAs: PublishingChatGPT_PBI_PASSWORD
-          - key: publishingchatgpt-use-web-socket
-            nameAs: PublishingChatGPT_USE_WEB_SOCKET
+          - key:  publishingchatgpt-azuread-tenantid
+            nameAs: PublishingChatGPT_AzureAd_TenantId
+          - key: publishingchatgpt-azuread-clientid
+            nameAs: PublishingChatGPT_AzureAd_ClientId
+          - key: publishingchatgpt-azuread-clientsecret
+            nameAs: PublishingChatGPT_AzureAd_ClientSecret

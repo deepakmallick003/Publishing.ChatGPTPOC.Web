@@ -2,43 +2,43 @@
 import openai
 import re
 
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain.vectorstores import Neo4jVector
+from langchain_community.vectorstores import Neo4jVector
 from langchain.chains import RetrievalQAWithSourcesChain
-from langchain.schema import HumanMessage
 from scripts.handlers import LLMCallbackHandler
 from scripts.db import Neo4jHelper
 
+import spacy
+
 class AI:
 
-    def __init__(self, settings, pathconfig, file_instance, socketio=None):
+    def __init__(self, settings, pathconfig, file_instance):
         self.settings = settings
         self.pathconfig = pathconfig
-        self.socketio = socketio
         self.file_instance = file_instance
 
-        # Set up the OpenAI API client
         openai.api_key = settings.Open_AI_API_Secret     
         self.model = settings.Open_AI_Model        
-        
+        self.max_tokens_response = settings.Open_AI_Max_Token
+        self.temperature = 0.3 
+        self.frequency_penalty = 0
+        self.presence_penalty = 0
+
         self.data_instance = self.init_data_instance()
-        self.custom_callback_handler_normal = LLMCallbackHandler('gptnormal', self.socketio)
-        self.custom_callback_handler_answer = LLMCallbackHandler('answer', self.socketio)
-        self.custom_callback_handler_reference = LLMCallbackHandler('reference', self.socketio)
-
-        self.refresh_settings_and_templates()
-
         self.dbhelper = Neo4jHelper(self.settings)
+        
+        self.refresh_retieval_qa()    
 
+        ## Run once only when new concepts are added to database #####
+        # self.save_concepts_and_sources_ner_model()
+        ##############################################################
+        self.nlp = self.load_concepts_and_sources_ner_model()
 
-    def refresh_settings_and_templates(self):
-        self.max_tokens_response, self.temperature= self.file_instance.read_eva_settings()
-        self.retieval_qa_normal, self.retieval_qa_answer, self.retieval_qa_reference = self.init_retieval_qa()    
 
     def init_data_instance(self):
-        embeddings = OpenAIEmbeddings(openai_api_key=self.settings.Open_AI_API_Secret, model='text-embedding-ada-002')
+        embeddings = OpenAIEmbeddings(openai_api_key=self.settings.Open_AI_API_Secret, model=self.settings.Open_AI_Embedding_Model, dimensions=int(self.settings.Open_AI_Embedding_Dimensions))
         instance=None
         instance = Neo4jVector.from_existing_index(
                 embeddings,
@@ -49,22 +49,18 @@ class AI:
                 index_name=self.settings.Neo4J_PrimaryIndexName,
                 text_node_property="info", 
             )
+        
         return instance
     
     def get_prompt_templates(self):
-        eva_answer_template, eva_reference_template = self.file_instance.read_template_files()
-
+        eva_answer_template = self.file_instance.read_template_files()
         input_variables=["summaries", "question"]
-       
+        
         prompt_template_answer = PromptTemplate(
             template=eva_answer_template, 
             input_variables=input_variables)  
-
-        prompt_template_reference = PromptTemplate(
-            template=eva_reference_template, 
-            input_variables=input_variables) 
-              
-        return prompt_template_answer, prompt_template_reference            
+        
+        return prompt_template_answer            
 
     def init_retieval_qa(self):
         param_llm = {
@@ -72,202 +68,139 @@ class AI:
             'temperature': self.temperature,
             'max_tokens': self.max_tokens_response,
             'openai_api_key': self.settings.Open_AI_API_Secret,
-            'streaming': True,
+            'streaming': True
         }
 
-        param_llm_answer = dict(param_llm)
-        param_llm_reference = dict(param_llm)
-        param_llm_normal= {
-            'model_name': 'gpt-3.5-turbo',
-            'temperature': self.temperature,
-            'max_tokens': self.max_tokens_response,
-            'openai_api_key': self.settings.Open_AI_API_Secret,
-            'streaming': True,
+        params_model={
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty
         }
-        
-        param_llm_answer.update({                
-            'callbacks': [self.custom_callback_handler_answer]
-        })
-        param_llm_reference.update({
-            'callbacks': [self.custom_callback_handler_reference] 
-        })
-        param_llm_normal.update({
-            'callbacks': [self.custom_callback_handler_normal] 
-        })
 
-        llm_answer = ChatOpenAI(**param_llm_answer)
-        llm_reference = ChatOpenAI(**param_llm_reference)
-        llm_normal= ChatOpenAI(**param_llm_normal)
+        param_llm = dict(param_llm)
+        llm_eva = ChatOpenAI(**param_llm, model_kwargs=params_model)
 
-        prompt_template_answer, prompt_template_reference = self.get_prompt_templates()    
+        prompt_template_answer = self.get_prompt_templates()    
         
         retrieval_qa_answer = RetrievalQAWithSourcesChain.from_chain_type(
-            llm=llm_answer,
+            llm=llm_eva,
             chain_type="stuff",
-            retriever=self.data_instance.as_retriever(),
+            retriever=self.data_instance.as_retriever(search_kwargs={"k": 10}),
             chain_type_kwargs={
                 "verbose": False,
                 "prompt": prompt_template_answer
             }
         )
 
-        retrieval_qa_reference = RetrievalQAWithSourcesChain.from_chain_type(
-            llm=llm_reference,
-            chain_type="stuff",
-            retriever=self.data_instance.as_retriever(),
-            chain_type_kwargs={
-                "verbose": False,
-                "prompt": prompt_template_reference
-            }
-        )           
+        return retrieval_qa_answer
+    
 
-        return llm_normal, retrieval_qa_answer, retrieval_qa_reference
+    def refresh_retieval_qa(self):
+        self.retieval_qa_answer = self.init_retieval_qa() 
 
-    def process_query(self, type, prompt):
-        print(f"process_query called with type: {type}, prompt: {prompt}")
+    def get_callback_instance(self, sessionId):
+        return LLMCallbackHandler(sessionId=sessionId)
 
-        if type=="gptnormal":
-            self.retieval_qa_normal([HumanMessage(content=prompt)])
+    def process_query_answer(self, callback_instance, prompt, temperature, frequency_penalty, presence_penalty):
+        self.temperature = float(temperature) if temperature else 0.3
+        self.frequency_penalty = float(frequency_penalty) if frequency_penalty else 0
+        self.presence_penalty = float(presence_penalty) if presence_penalty else 0
 
-        if type=='answer':
-            self.retieval_qa_answer({"question": prompt}, return_only_outputs=True)
-          
-        if type=='reference':
-            self.retieval_qa_reference({"question": prompt}, return_only_outputs=True)
+        self.refresh_retieval_qa()
 
-    # def validate_and_fix_response_urls(self, text):
-        # Extract all hyperlinks from texts, then seperate pan from article type anchors e.g
-        # <a href="https://www.cabidigitallibrary.org/doi/10.5555/20183000178">The ebola epidemic in West Africa: proceedings of a workshop.</a>
-        # Extract pan number 20183000178 which would be usefult to find correct node and source
-        # from a concept type anchor like <a href="https://id.cabi.org/cabt/301097">Ebola haemorrhagic fever</a>
-        # exrtact "Ebola haemorrhagic fever" which is title of the node and would be useful to find correct node.
+        print(f"process_query_answer called: sessionId: {callback_instance.sessionId}, prompt: {prompt}")
+        self.retieval_qa_answer({"question": prompt}, return_only_outputs=True, callbacks = [callback_instance])
+    
+    def load_spacy_model(self, model_name="en_core_web_sm"):
+        try:
+            return spacy.load(model_name)
+        except OSError:
+            from spacy.cli import download
+            download(model_name)
+            return spacy.load(model_name)
 
-        # After extracting all article and concept types values, loop through them to validate one by one.
-        # For an article type check if the article is present by pan, if yes then see if the source value match with this. If node deosn't exists remove hyperlink and simply keep the text.
-        # For a concept type check if the concept is present is present by name, if yes then see if the source value match with this. If node deosn't exists remove hyperlink and simply keep the text.
-
-        # After this do one more thing. From the text get different trigram cobinations, sequential ones only no reverse or random mix match.
-        # FOr each of those combinations get all concepts which exists in the database and their source.
-        # If a concept exists for a concept replace it with a hyperlink using it's source from the node.
-
-
-    def split_text_on_ngrams(self, text, ngrams):
-        segments = []
-        i = 0
-        while i < len(text):
-            found = False
-            for ngram in ngrams:
-                if text[i:].startswith(ngram):
-                    segments.append(ngram)
-                    i += len(ngram)
-                    found = True
-                    break
-            if not found:
-                segments.append(text[i])
-                i += 1
-        return segments
-
-    def validate_and_fix_response_urls(self, text, send_report_data=False):
-        if isinstance(send_report_data, str):
-            send_report_data = send_report_data.lower() == 'true'
-
-        collection = {
-            'articles': [],
-            'concepts': []
-        }
-        
-        article_links = re.findall(r'<a href="(https://www\.cabidigitallibrary\.org/doi/[^/]+/([^/"]+))">([^<]+)</a>', text)
-        concept_links = re.findall(r'<a href="(https://id\.cabi\.org/cabt/[^"]+)">([^<]+)</a>', text)
-
-        # Validate and fix article links
-        for link, pan, title in article_links:
-            if not self.dbhelper.article_exists_by_pan_and_source(pan, link):
-                text = text.replace(f'<a href="{link}">', '').replace('</a>', '')
-            else:
-                if send_report_data==True:
-                    collection['articles'].append({
-                        'title': title,
-                        'pan': pan,
-                        'source': link,
-                        'document_type': 'article'
-                    })
-
-        # Validate and fix concept links
-        for link, name in concept_links:
-            if not self.dbhelper.concept_exists_by_name_and_source(name, link):
-                text = text.replace(f'<a href="{link}">', '').replace('</a>', '')
-            else:
-                if send_report_data==True:
-                    collection['concepts'].append({
-                        'title': title,
-                        'source': link,
-                        'document_type': 'concept'
-                    })
-
-        # Enrich text with trigram-based concept links        
-        stop_words = set([
-            "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
-            "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
-            "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was",
-            "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and",
-            "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between",
-            "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off",
-            "over", "under", "again", "further", "then", "once", "also", "given"
-        ])    
-
-        # Extract and temporarily store the source and related articles part
-        source_articles_match = re.search(r'(<h4>Source Articles</h4>.*)', text, flags=re.DOTALL)
-        if source_articles_match:
-            source_articles = source_articles_match.group(1)
-            placeholder = "##SOURCE_ARTICLES_PLACEHOLDER##"
-            text = text.replace(source_articles, placeholder)
+    def save_concepts_and_sources_ner_model(self):
+        nlp = self.load_spacy_model("en_core_web_sm")
+        if "entity_ruler" not in nlp.pipe_names:
+            entity_ruler = nlp.add_pipe("entity_ruler")
         else:
-            source_articles = ""
+            entity_ruler = nlp.get_pipe("entity_ruler")
+        
+        concepts_sources = self.dbhelper.fetch_concepts_and_sources()
+        patterns = [{"label": "CONCEPT", "pattern": concept, "id": source} 
+                for concept, source in concepts_sources.items()]
+        entity_ruler.add_patterns(patterns)
 
-        # Use regex tokenizer to split the text into words, excluding punctuation.
-        tokenizer = re.compile(r'\w+')
-        words = [word for word in tokenizer.findall(text) if word.lower() not in stop_words]
+        nlp.to_disk(self.pathconfig.CONCEPT_TRAINED_NER_PATH)
 
-        # Extracting potential ngrams
-        # Step 1: Collect all ngrams
-        all_ngrams = set()
-        for n in range(1, 4):  # 1 for unigram, 2 for bigram, 3 for trigram
-            for i in range(len(words) - n + 1):
-                ngram = ' '.join(words[i:i+n])
-                if len(ngram) >= 2:
-                    all_ngrams.add(ngram)
+    def load_concepts_and_sources_ner_model(self):
+        try:
+            nlp = spacy.load(self.pathconfig.CONCEPT_TRAINED_NER_PATH, enable=["entity_ruler"])
+        except Exception:
+            self.save_concepts_and_sources_ner_model()
+            nlp = spacy.load(self.pathconfig.CONCEPT_TRAINED_NER_PATH)
 
-        # Step 2: Fetch sources for all ngrams at once
-        ngram_sources = self.dbhelper.fetch_sources_for_ngrams(all_ngrams)
+        return nlp
 
-        # Sorting ngrams by length (descending)
-        sorted_ngrams = sorted(ngram_sources.keys(), key=len, reverse=True)
+    def fetch_concepts(self, text):
+        # print(text)
+        # start_time = time.time()
 
-        segments = self.split_text_on_ngrams(text, sorted_ngrams)
+        doc = self.nlp(text)
+        concepts_sources = {}
+        for ent in doc.ents:
+            if ent.label_ == "CONCEPT":
+                concepts_sources[ent.text] = ent.ent_id_
 
-        # Replacing ngrams in the segments
-        modified_segments = []
-        for segment in segments:
-            if segment in ngram_sources:
-                modified_segments.append(f'<a href="{ngram_sources[segment]}">{segment}</a>')
-                if send_report_data==True:
-                    collection['concepts'].append({
-                        'title': segment,
-                        'source': ngram_sources[segment],
-                        'document_type': 'concept'
-                    })
-            else:
-                modified_segments.append(segment)
+        # end_time = time.time()
+        # time_taken = end_time - start_time
+        # print(f"Time taken to fetch concepts: {time_taken} seconds")
+        # print()
+        return concepts_sources
 
-        # Reassembling the segments to get the modified text
-        text = ''.join(modified_segments)
+    def fetch_sources(self, pans):
+        
+        sources = []
 
-        # Restore the source articles portion
-        if source_articles:
-            text = text.replace(placeholder, source_articles)
+        try:
+            sources = self.dbhelper.fetch_sources_for_pans(pans)
 
-        nodes_and_relations=None
-        if send_report_data==True:
-            nodes_and_relations = self.dbhelper.fetch_related_nodes_and_relations(collection)
+            # Updated patterns for improved flexibility
+            title_pattern = re.compile(r'Title:\s*(.+?)(?=\n|$)', re.DOTALL)
+            publisher_name_pattern = re.compile(r'Publisher Name:\s*(.+?)(?=\n|$)')
+            publisher_location_pattern = re.compile(r'Publisher Location:\n\s*City: (.+?)\n\s+Country: (.+?)(?=\n|$)')
+            publishing_date_pattern = re.compile(r'Publishing Date: (.+?)(?=\n|$)')
+            abstract_summary_pattern = re.compile(r'Abstract Summary:\s*(.+)', re.DOTALL)
+            
+            categories_pattern = re.compile(r"Subjects or Categories:\n\s*(.*?)(?=Publisher Name:)", re.DOTALL)
+            authors_pattern = re.compile(r"Authors:\n\s*(.*?)(?=Abstract Summary:)", re.DOTALL)
 
-        return text, nodes_and_relations   
+            for source in sources:
+                info = source['info']
+                info = source['info'].encode('latin1').decode('utf-8')
+                
+                source.pop('info', None)
+
+                source['PAN'] = source['source']
+                source['Title'] = title_match.group(1).strip() if (title_match := title_pattern.search(info)) else None
+                source['Publisher Name'] = publisher_name_match.group(1).strip() if (publisher_name_match := publisher_name_pattern.search(info)) else None
+                publisher_location_match = publisher_location_pattern.search(info)
+                if publisher_location_match:
+                    source['Publisher Location'] = f"{publisher_location_match.group(1).strip()}, {publisher_location_match.group(2).strip()}"
+                source['Publishing Date'] = publishing_date_match.group(1).strip() if (publishing_date_match := publishing_date_pattern.search(info)) else None
+                source['Abstract Summary'] = abstract_summary_match.group(1).strip() if (abstract_summary_match := abstract_summary_pattern.search(info)) else None
+
+                categories_match = categories_pattern.search(info)
+                if categories_match:
+                    categories_text = categories_match.group(1).strip()
+                    source['Categories'] = [line.strip() for line in categories_text.split("\n") if line.strip()]
+
+                authors_match = authors_pattern.search(info)
+                if authors_match:
+                    authors_text = authors_match.group(1).strip()
+                    source['Authors'] = [line.strip() for line in authors_text.split("\n") if line.strip()]
+
+        except Exception as e:
+            pass
+        
+        return sources
+    

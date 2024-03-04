@@ -11,7 +11,7 @@ class Neo4jHelper:
     def article_exists_by_pan_and_source(self, pan, source):
         query = (
             "MATCH (n:PublishingDataChunk) "
-            "WHERE n.document_type='article' AND n.pan = $pan AND n.source = $source "
+            "WHERE n.type='article' AND n.pan = $pan AND n.source = $source "
             "RETURN count(n) as cnt"
         )
         with self.driver.session() as session:
@@ -22,7 +22,7 @@ class Neo4jHelper:
     def concept_exists_by_name_and_source(self, name, source):
         query = (
             "MATCH (n:PublishingDataChunk) "
-            "WHERE n.document_type='concept' AND n.title = $name AND n.source = $source "
+            "WHERE n.type='concept' AND n.title = $name AND n.source = $source "
             "RETURN count(n) as cnt"
         )
         with self.driver.session() as session:
@@ -34,7 +34,7 @@ class Neo4jHelper:
         query = (
             "UNWIND $ngrams as ngram "
             "MATCH (n:PublishingDataChunk) "
-            "WHERE n.document_type='concept' AND toLower(n.title) = toLower(ngram) "
+            "WHERE n.type='concept' AND toLower(n.title) = toLower(ngram) "
             "RETURN ngram, COLLECT(n.source) as sources"
         )
 
@@ -44,6 +44,36 @@ class Neo4jHelper:
             sources_map = {record["ngram"]: record["sources"][0] for record in result if record["sources"]}
 
         return sources_map
+
+    def fetch_sources_for_pans(self, pans):
+        sources_info_list=[]
+        
+        query = """
+        MATCH (n)
+        WHERE n.type='article' AND n.source IN $pans
+        RETURN n.source AS source, n.info AS info
+        LIMIT 10
+        """
+        with self.driver.session() as session:
+            result = session.run(query, pans=pans)
+            sources_info_list = [{"source": record["source"], "info": record["info"]} for record in result]
+
+        return sources_info_list
+
+    def fetch_concepts_and_sources(self):
+        query = (
+            "MATCH (n) "
+            "WHERE n.type='concept' "
+            "RETURN n.title as concept, n.source as source"
+        )
+        concepts_sources = {}
+        with self.driver.session() as session:
+            result = session.run(query)
+            for record in result:
+                concept = record["concept"]
+                source = record["source"]
+                concepts_sources[concept] = source
+        return concepts_sources
 
     def fetch_related_nodes_and_relations(self, collection):
         with self.driver.session() as session:
@@ -59,11 +89,11 @@ class Neo4jHelper:
         RETURN 
             n.title AS NodeTitle, 
             n.source AS NodeSource, 
-            n.document_type AS NodeDocType,
+            n.type AS NodeDocType,
             type(r) AS RelationType,
             connected.title AS ConnectedTitle, 
             connected.source AS ConnectedSource, 
-            connected.document_type AS ConnectedDocType
+            connected.type AS ConnectedDocType
         """
         results = tx.run(query, data=collection['articles'] + collection['concepts'])
         

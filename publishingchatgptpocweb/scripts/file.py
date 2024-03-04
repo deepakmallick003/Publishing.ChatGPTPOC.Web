@@ -24,25 +24,10 @@ class FILES:
             return 500, 1  # return default values on error
 
     def read_template_files(self):
-        try:
-            with open(self.pathconfig.EVA_TEMPLATE_ANSWER_CURRENT_FILE_PATH, "r") as file:
-                eva_answer_template = file.read()
-            with open(self.pathconfig.EVA_TEMPLATE_REFERENCE_CURRENT_FILE_PATH, "r") as file:
-                eva_reference_template = file.read()
+        with open(self.pathconfig.EVA_TEMPLATE_ANSWER_FILE_PATH, "r") as file:
+            eva_answer_template = file.read()
 
-            eva_answer_template = eva_answer_template.replace('<editable>', '\n').replace('</editable>', '\n')
-            eva_reference_template = eva_reference_template.replace('<editable>', '\n').replace('</editable>', '\n')
-            
-            return eva_answer_template, eva_reference_template
-
-        except Exception as e:
-            print(f"Exception occurred while reading file: {e}")
-            with open(self.pathconfig.EVA_TEMPLATE_ANSWER_FILE_PATH, "r") as file:
-                eva_answer_template = file.read()
-            with open(self.pathconfig.EVA_TEMPLATE_REFERENCE_FILE_PATH, "r") as file:
-                eva_reference_template = file.read()
-
-            return eva_answer_template, eva_reference_template
+        return eva_answer_template
 
     def save_template(self, file_name, content):
         try:
@@ -67,5 +52,4 @@ class FILES:
 
         except Exception as e:
             return f'An error occurred while saving the settings: {e}', 500
-
-
+    

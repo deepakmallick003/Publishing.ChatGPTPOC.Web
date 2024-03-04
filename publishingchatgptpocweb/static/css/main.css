@@ -84,7 +84,7 @@
      border-radius: 5px;
      border: none;
      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
-     font-size: 16px;
+     font-size: var(--p-font-size);;
      resize: none;
     /* Disable resizing of the textarea */
 }
@@ -436,10 +436,6 @@ input:checked + .slider:before {
     display: none;
 }
 
-#section_2 {
-    display: none;
-}
-
 
 /*********Override Template Css*******/
 
@@ -458,16 +454,16 @@ input:checked + .slider:before {
     --body-font-family:             'Open Sans', sans-serif;
     --title-font-family:            'Montserrat', sans-serif;
   
-    --h1-font-size:                 58px;
-    --h2-font-size:                 46px;
-    --h3-font-size:                 32px;
-    --h4-font-size:                 28px;
-    --h5-font-size:                 24px;
-    --h6-font-size:                 22px;
-    --p-font-size:                  20px;
-    --menu-font-size:               14px;
-    --btn-font-size:                18px;
-    --copyright-font-size:          16px;
+    --h1-font-size: 41px;
+    --h2-font-size: 32px;
+    --h3-font-size: 22px;
+    --h4-font-size: 20px;
+    --h5-font-size: 17px;
+    --h6-font-size: 15px;
+    --p-font-size: 14px;
+    --menu-font-size: 10px;
+    --btn-font-size: 13px;
+    --copyright-font-size: 11px;
   
     --border-radius-large:          100px;
     --border-radius-medium:         20px;
@@ -489,7 +485,7 @@ input:checked + .slider:before {
 }
 
 .custom-block-overlay {
-    min-height: 250px
+    min-height: 180px;
 }
 
 a {
@@ -499,7 +495,6 @@ a {
 
 h6 {
     color: var(--primary-color);
-    font-size: 1rem;
 }
 
 .timeline-container .vertical-scrollable-timeline li .icon-holder {
@@ -581,10 +576,6 @@ h6 {
     --bs-btn-disabled-border-color: var(--secondary-color)
 }
 
-.bg-temperature {
-    background-color: var(--secondary-color);
-}
-
 .link-bottom-container {
     position: absolute;
     bottom: 0;
@@ -598,6 +589,7 @@ h6 {
 input[type=range]{
     -webkit-appearance: none;
     width: 100%;
+    background-color: transparent;
 }
 
 input[type=range]::-webkit-slider-runnable-track {
@@ -687,4 +679,155 @@ input[type=range]::-webkit-slider-thumb {
 
 .indent-left {
     margin-left: 20px;
+}
+
+.nav-span{
+    border-radius: var(--border-radius-large);
+    margin: 10px;
+    padding: 10px;
+    color: var(--white-color);
+    display: inline-block;
+    font-family: var(--title-font-family);
+    font-size: var(--menu-font-size);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+.hero-section {
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+.featured-section{
+    border-radius: 0;
+    padding-bottom: 20px;
+}
+
+.section-padding{
+    padding-top: 20px;
+}
+
+/* #section_2 {
+    display: none;
+} */
+
+#eva-answer sources{
+    display: none !important;
+}
+
+
+
+
+
+.card {
+    border: none;
+    border-radius: 4px;
+    background-color: #cccccc30;
+    max-width: 486px;
+}
+    
+.card-body {
+    padding: 1.25rem; 
+}
+    
+.card-title {
+    font-size: 14px;
+    font-weight: bolder;
+    width: 100%;
+    display:flex;
+    cursor: pointer;
+}
+
+.title-anchor{
+    margin: 2px;
+}
+
+.title-text{
+    flex-grow: 1;
+    margin: 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-subtitle {
+    font-size: 10px;
+    color: #6c757d;
+}
+
+.card-subtitle .badge {
+    background-color: rgba(0, 0, 0, 0.55) !important;
+    font-size: 85%;
+    margin: 2px;
+}
+
+.publisher {
+    font-size: 10px;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.publisher .bi{
+    margin:2px;
+    color:var(--secondary-color);
+    font-size: 12px;
+}
+
+.authors{
+    display: inline-block;
+}
+
+.location{
+    font-size: 10px;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.location .bi{
+    margin:2px;
+    color:var(--secondary-color);
+    font-size: 12px;
+}
+
+.toggle-summary {
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.summary-text {
+    display: none; 
+    font-size: 10px;
+    line-height: 1.5;
+    margin: 5px;
+    text-align: justify;
+}
+
+.summary-text.show {
+    display: block;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+.mb-3 {
+    margin-bottom: 1rem;
+}
+.text-muted {
+    color: #6c757d; 
+}
+
+
+.model-parameters-label{
+    font-size: 12px;
+    display: inline-block;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.model-parameters-value {
+    background-color: var(--section-bg-color);
+    color:var(--secondary-color);
+    font-size: 10px;
 }

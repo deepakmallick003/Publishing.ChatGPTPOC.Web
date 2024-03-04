@@ -148,3 +148,4 @@ cython_debug/
 /publishingchatgptpocweb/.vscode
 /publishingchatgptpocweb/.vs
 
+/publishingchatgptpocweb/flask_session

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>CABI Publishing Wiki</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/templatemo-topic-listing.css" rel="stylesheet">
+
+    <link href="{{ config['BASE_PATH'] }}/static/css/main.css" rel="stylesheet">
+    <!--
+
+    TemplateMo 590 topic listing
+
+    https://templatemo.com/tm-590-topic-listing
+
+    -->
+</head>
+
+<body id="top">
+
+    <main>
+
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    <i class="bi-journal-bookmark-fill"></i>
+                    <span>CABI Publishing Wiki</span>
+                </a>
+
+                <div class="d-lg-none ms-auto me-4">
+                    <a href="#top" class="navbar-icon bi-person smoothscroll"></a>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-lg-5 me-lg-auto">
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll {{ 'active' if current_path == url_for('index') else 'inactive' }}" href="{{ url_for('index') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll {{ 'active' if current_path == url_for('about') else 'inactive' }}" href="{{ url_for('about') }}">About</a>
+                        </li>
+                    </ul>
+                    <div class="d-none d-lg-block">
+                        <a href="#top" class="navbar-icon bi-person smoothscroll"></a>
+                        <span class="nav-span">Welcome {{ session['user_name'] }}</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        {% block content %}
+        <!-- Page specific content will go here -->
+        {% endblock %}
+
+        <div class="modal fade" id="genericModal" tabindex="-1" role="dialog" aria-labelledby="genericModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="genericModalLabel">Modal Title</h5>
+                    </div>
+                    <div class="d-flex modal-body justify-content-center">
+                        <i class="bi-bug-fill"></i>
+                        <span id="genericModalBody" style="margin-left:5px;"></span>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <footer class="site-footer section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-12 mb-4 pb-2">
+                    <a class="navbar-brand" href="index.html">
+                        <i class="bi-journal-bookmark-fill"></i>
+                        <span>CABI Publishing Wiki</span>
+                    </a>
+                </div>
+                <div class="col-lg-6 col-md-4 col-12 mt-lg-0 ms-auto">
+                    <p class="copyright-text mt-3">
+                        © Copyright 2023 CABI is a registered EU trademark
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="{{ config['BASE_PATH'] }}/static/js/jquery.min.js"></script>
+    <script src="{{ config['BASE_PATH'] }}/static/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.bundle.min.js"></script> -->
+    
+    <script src="{{ config['BASE_PATH'] }}/static/js/jquery.sticky.js"></script>
+    <!--<script src="{{ config['BASE_PATH'] }}/static/js/click-scroll.js"></script>-->
+    <script src="{{ config['BASE_PATH'] }}/static/js/custom.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/powerbi-client/dist/powerbi.min.js"></script> -->
+    <script>
+        var BASE_PATH = "{{ config['BASE_PATH'] }}";
+    </script>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script id="mainScript" src="{{ config['BASE_PATH'] }}/static/js/main.js"></script>
+</body>
+</html>

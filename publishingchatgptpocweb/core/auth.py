@@ -8,11 +8,11 @@ from core.config import settings
 class Auth:
 
     def __init__(self):
-        self.AzureAd_TenantId: str = settings.AzureAd_TenantId
-        self.AzureAd_ClientId: str = settings.AzureAd_ClientId
-        self.AzureAd_ClientSecret: str =  settings.AzureAd_ClientSecret 
-        self.AzureAd_Redirect_Path: str = settings.AzureAd_Redirect_Path 
-        self.AzureAd_Authority: str = settings.AzureAd_Authority
+        self.AzureAd_TenantId = settings.AzureAd_TenantId
+        self.AzureAd_ClientId = settings.AzureAd_ClientId
+        self.AzureAd_ClientSecret =  settings.AzureAd_ClientSecret 
+        self.AzureAd_Redirect_Path = settings.AzureAd_Redirect_Path 
+        self.AzureAd_Authority = settings.AzureAd_Authority + self.AzureAd_TenantId
 
     def load_cache(self):
         cache = msal.SerializableTokenCache()

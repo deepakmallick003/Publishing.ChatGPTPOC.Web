@@ -3,34 +3,44 @@ from queue import SimpleQueue
 from typing import Any
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import LLMResult
+from typing import Union
 
 class LLMCallbackHandler(BaseCallbackHandler):
-    def __init__(self, type, socketio=None):
-        self.type = type
-        self.socketio = socketio
+    def __init__(self, sessionId):
+        self.sessionId = sessionId
         self.outputs = []
         self.queue = SimpleQueue()
 
     def on_llm_new_token(self, token: str, **kwargs) -> None:
         self.outputs.append(token)
-        if self.socketio is not None:
-            self.socketio.emit(f'{self.type}_response', {'status': 'sending partial response', 'type': self.type, 'text': token})
-            print(f"{self.type} Type, Sending chunk: {token}")
-        else:
-            message_data = {'response': token}
-            formatted_message = f"event: {self.type}\ndata: {json.dumps(message_data)}\n\n"
-            self.queue.put(formatted_message)
+        message_data = {'sessionId': self.sessionId, 'response': token}
+        formatted_message = f"event: llmstream\ndata: {json.dumps(message_data)}\n\n"
+        self.queue.put(formatted_message)
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> Any:
-        completion_data = {'status': 'complete'}
-        completion_message = f'event: {self.type}\ndata: {json.dumps(completion_data)}\n\n'
+        completion_data = {'sessionId': self.sessionId, 'status': 'complete'}
+        completion_message = f'event: llmstream\ndata: {json.dumps(completion_data)}\n\n'
+        self.queue.put(completion_message)
+        self.stop_event_stream()
 
-        if self.socketio is not None:
-            print(f"{type} Type Response Exited, sending completion status")
-            self.socketio.emit(f'{self.type}_response', {'status': 'full response complete', 'type': self.type})  
-        else:
-            self.queue.put(completion_message)
-            self.stop_event_stream()
+    def on_llm_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> Any:
+        self.send_error_event(str(error))
+
+    def on_chain_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> Any:
+        self.send_error_event(str(error))
+
+    def on_tool_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> Any:
+        self.send_error_event(str(error))
+
+    def send_error_event(self, error_message: str):
+        error_data = {
+            'sessionId': self.sessionId, 
+            'status': 'error', 
+            'message': error_message
+        }
+        error_event = f"event: error\ndata: {json.dumps(error_data)}\n\n"
+        self.queue.put(error_event)
+        self.stop_event_stream()
 
     def event_stream(self):
         while True:
