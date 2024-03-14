@@ -10,7 +10,7 @@ let globalConceptsDict = {};
 let incompleteSummary = "";
 
 
-$(document).ready(function() {
+$(window).load(function() {
     $('[data-toggle="tooltip"]').tooltip();
 
     $('.model-parameters-sliders').on('input', function () {
